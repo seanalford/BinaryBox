@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Protocol\HexAscii\**" />
+    <EmbeddedResource Remove="Protocol\HexAscii\**" />
+    <None Remove="Protocol\HexAscii\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ReactiveUI" Version="11.1.23" />
+    <PackageReference Include="ReactiveUI.Fody" Version="11.1.23" />
+  </ItemGroup>
+
+</Project>
