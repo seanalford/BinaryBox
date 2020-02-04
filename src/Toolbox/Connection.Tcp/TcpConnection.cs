@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Toolbox.Communication.Connection.Tcp
+namespace Toolbox.Connection.Tcp
 {
     public class TcpConnection : Connection
     {
@@ -117,7 +117,7 @@ namespace Toolbox.Communication.Connection.Tcp
 
         public async override Task<byte[]> ReceiveAsync(int bytesToRead, CancellationToken cancellationToken)
         {
-            // TODO: Fix this...
+            // TODO: Fix this...  Use System.Net.Pipelines.Pipes
             byte[] buffer = new byte[1024];
             var bytesRead = await Client.GetStream().ReadAsync(buffer, 0, bytesToRead);
             return buffer;

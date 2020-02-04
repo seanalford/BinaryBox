@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Communication.Connection;
+using Toolbox.Connection;
 
-namespace Toolbox.Communication.Protocol
+namespace Toolbox.Protocol
 {
     public abstract class Client<TMethod, TMethodResult, TMethodStatus> : IClient<TMethod, TMethodResult, TMethodStatus>
         where TMethod : IMethod

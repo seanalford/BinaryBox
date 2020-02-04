@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Toolbox.Communication.Connection
+namespace Toolbox.Connection
 {
     public enum ConnectionState
     {

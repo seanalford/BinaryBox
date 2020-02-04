@@ -5,7 +5,7 @@ using System.Text;
 namespace Toolbox.Checksum.Test
 {
     [TestClass]
-    public class TestEagleExtentionChecksums
+    public class TestToolboxExtentionChecksums
     {
 
         [TestMethod]

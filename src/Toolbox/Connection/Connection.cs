@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace Toolbox.Communication.Connection
+namespace Toolbox.Connection
 {
     public abstract class Connection : IConnection
     {

@@ -9,8 +9,4 @@
     <PackageReference Include="Figgle" Version="0.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Toolbox.Communication\Toolbox.Communication.csproj" />
-  </ItemGroup>
-
 </Project>

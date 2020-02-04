@@ -1,10 +1,12 @@
 ﻿using System;
 
-namespace Toolbox.Communication.Protocol
+namespace Toolbox.Protocol
 {
     public interface IMethod : IDisposable
     {
         byte[] Encode();
         bool Decode(byte[] data);
+
+
     }
 }

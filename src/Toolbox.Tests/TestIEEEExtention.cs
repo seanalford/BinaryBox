@@ -4,7 +4,7 @@ using System;
 namespace Toolbox.IEEE.Test
 {
     [TestClass]
-    public class TestEagleExtentionsIEEE
+    public class TestToolboxExtentionsIEEE
     {
 
         [DataTestMethod]
