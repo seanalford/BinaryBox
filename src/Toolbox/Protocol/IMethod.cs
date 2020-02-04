@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Toolbox.Protocol
 {
@@ -6,7 +7,6 @@ namespace Toolbox.Protocol
     {
         byte[] Encode();
         bool Decode(byte[] data);
-
-
+        IDictionary<string, object> Data();
     }
 }

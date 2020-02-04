@@ -1,46 +1,29 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace Toolbox.Protocol
 {
-    public interface IMethodResult<TMethodStatus>
-       where TMethodStatus : struct
+    public interface IMethodResult<TMethodResultStatus, TMethodStatus, TMethodResultData>
+        where TMethodResultStatus : IMethodResultStatus<TMethodStatus>
+        where TMethodStatus : struct
+        where TMethodResultData : IDictionary<string, object>
     {
-        TMethodStatus Status { get; }
-        string Text { get; }
-
+        TMethodResultStatus Status { get; }
+        TMethodResultData Data { get; }
     }
-    public abstract class MethodResult<TStatus> : IMethodResult<TStatus>
-        where TStatus : struct
-    {
-        public TStatus Status { get; protected set; }
-        public string Text { get; protected set; }
 
-        public MethodResult(TStatus status, string text = "")
+    public abstract class MethodResult<TMethodResultStatus, TMethodStatus, TMethodResultData> : IMethodResult<TMethodResultStatus, TMethodStatus, TMethodResultData>
+        where TMethodResultStatus : IMethodResultStatus<TMethodStatus>
+        where TMethodStatus : struct
+        where TMethodResultData : IDictionary<string, object>
+    {
+        public TMethodResultStatus Status { get; protected set; }
+
+        public TMethodResultData Data { get; protected set; }
+
+        public MethodResult(TMethodResultStatus status, TMethodResultData data)
         {
-            if (!typeof(TStatus).IsEnum)
-            {
-                throw new ArgumentException("TStatus must be an enumerated type");
-            }
             Status = status;
-            Text = text;
+            Data = data;
         }
     }
-
-    //public abstract class MethodResult<TStatus, TData> : IMethodResult<TStatus>
-    //    where TStatus : struct
-    //    where TData : IDictionary<string, object>
-    //{
-    //    public TStatus Status { get; protected set; }
-    //    public string Text { get; protected set; }
-
-    //    public MethodResult(TStatus status, string text = "")
-    //    {
-    //        if (!typeof(TStatus).IsEnum)
-    //        {
-    //            throw new ArgumentException("TStatus must be an enumerated type");
-    //        }
-    //        Status = status;
-    //        Text = text;
-    //    }
-    //}
 }
