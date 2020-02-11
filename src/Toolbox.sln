@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox", "Toolbox\Toolbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox.Tests", "Toolbox.Tests\Toolbox.Tests.csproj", "{C3E441B2-ADC5-461D-A725-887DBA689B89}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolbox.Connection.Tcp", "Toolbox.Connection.Tcp\Toolbox.Connection.Tcp.csproj", "{8EDABE24-355E-4CA8-B00A-B58F6B17E848}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{C3E441B2-ADC5-461D-A725-887DBA689B89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3E441B2-ADC5-461D-A725-887DBA689B89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3E441B2-ADC5-461D-A725-887DBA689B89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EDABE24-355E-4CA8-B00A-B58F6B17E848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EDABE24-355E-4CA8-B00A-B58F6B17E848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EDABE24-355E-4CA8-B00A-B58F6B17E848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EDABE24-355E-4CA8-B00A-B58F6B17E848}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{71E2C0EB-9BBE-4E66-B3F2-5FE3F2DF4CBA} = {A11ECCCF-9BF0-4014-9F5A-64110AA7414A}
 		{AB8CDF7B-3EC9-4EE3-B796-18284D125B97} = {A11ECCCF-9BF0-4014-9F5A-64110AA7414A}
 		{C3E441B2-ADC5-461D-A725-887DBA689B89} = {9AD0C034-EDD3-462A-8631-16679592059A}
+		{8EDABE24-355E-4CA8-B00A-B58F6B17E848} = {A11ECCCF-9BF0-4014-9F5A-64110AA7414A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {28858F84-FF07-48BA-B32E-D397943590E5}
