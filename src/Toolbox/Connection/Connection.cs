@@ -1,84 +1,234 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
+﻿using ReactiveUI.Fody.Helpers;
+using System;
+using System.Buffers;
+using System.Diagnostics;
+using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using Toolbox.Checksum;
 
 namespace Toolbox.Connection
 {
+    public interface IConnection : IDisposable
+    {
+        IConnectionSettings Settings { get; set; }
+        ConnectionState State { get; }
+        Task<ConnectionState> ConnectAsync();
+        Task<bool> DataAvaliableAsync();
+        Task<ConnectionState> DisconnectAsync();
+        Task<Memory<byte>> ReadAsync(int bytesToRead, CancellationToken cancellationToken);
+        Task<Memory<byte>> ReadAsync(byte endOfMessageToken, CancellationToken cancellationToken, bool IncludeChecksum = true);
+        Task<bool> WriteAsync(Memory<byte> data, CancellationToken cancellationToken);
+    }
+
     public abstract class Connection : IConnection
     {
-        private const int DEFAULT_CONNECT_RETIRES = 3000;
-        private const int DEFAULT_CONNECT_TIMEOUT = 15000;
-        private const int DEFAULT_SEND_RETIRES = 3000;
-        private const int DEFAULT_SEND_TIMEOUT = 15000;
-        private const int DEFAULT_RECEIVE_RETRIES = 3000;
-        private const int DEFAULT_RECEIVE_TIMEOUT_INNER = 1000;
-        private const int DEFAULT_RECEIVE_TIMEOUT_OUTER = 15000;
+        private Pipe Pipe = null;
 
-        [Reactive] public int ConnectRetries { get; set; } = DEFAULT_CONNECT_RETIRES;
-        [Reactive] public int ConnectTimeout { get; set; } = DEFAULT_CONNECT_TIMEOUT;
-        [Reactive] public int SendRetries { get; set; } = DEFAULT_SEND_RETIRES;
-        [Reactive] public int SendTimeout { get; set; } = DEFAULT_SEND_TIMEOUT;
-        [Reactive] public int ReceiveRetries { get; set; } = DEFAULT_RECEIVE_RETRIES;
-        [Reactive] public int ReceiveTimeoutInner { get; set; } = DEFAULT_RECEIVE_TIMEOUT_INNER;
-        [Reactive] public int ReceiveTimeoutOuter { get; set; } = DEFAULT_RECEIVE_TIMEOUT_OUTER;
-        [Reactive] public bool Connected { get; protected set; } = false;
-        [Reactive] public bool DataAvaliable { get; protected set; } = false;
-        [Reactive] public ConnectionState State { get; protected set; } = ConnectionState.Disconnected;
-        public IObservable<ConnectionState> StateChanged { get; protected set; }                
+        [Reactive] public IConnectionSettings Settings { get; set; }
+        [Reactive] public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
-        public Connection()
+        #region Constructors
+        public Connection() : this(new ConnectionSettings())
         {
-            StateChanged = this.WhenAnyValue(x => x.State).DistinctUntilChanged();            
+
         }
 
-        public abstract Task<bool> ConnectAsync();
-        public abstract Task<bool> DisconnectAsync();
-        public abstract void Dispose();
-        public abstract Task<int> ReceiveAsync(byte[] buffer, CancellationToken cancellationToken);
-        public abstract Task<bool> SendAsync(byte[] data, CancellationToken cancellationToken);
-        public abstract Task<byte[]> ReceiveAsync(int bytesToRead, CancellationToken cancellationToken);
-        
+        public Connection(IConnectionSettings settings)
+        {
+            Settings = settings;
+        }
+        #endregion
 
-        //public IObservable<byte> Receive(CancellationToken cancellationToken)
-        //{
-        //    return Observable.Create<byte>(d =>
-        //    {
-        //        IDisposable result = null;
-        //        byte[] buffer = new byte[1024];
-        //        try
-        //        {
-        //            while (State == ConnectionState.Conneted)
-        //            {
-        //                while (DataAvaliable)
-        //                {
-        //                    result = ReceiveAsync(buffer, cancellationToken)
-        //                    .ToObservable()
-        //                    .Where(x => x > 0)
-        //                    .Subscribe(_ =>
-        //                    {
-        //                        foreach (byte item in buffer)
-        //                        {
-        //                            d.OnNext(item);
-        //                        }
-        //                    });
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            d.OnError(ex);
-        //        }
-        //        d.OnCompleted();
-        //        return result;
-        //    });
-        //}
+        public async Task<ConnectionState> ConnectAsync()
+        {
+            State = ConnectionState.Connecting;
+            try
+            {
+                State = await ConnectTask();
+            }
+            catch (Exception ex)
+            {
+                //TODO:Log.Exception(ex);
+                throw ex;
+            }
+            return State;
+        }
+        protected abstract Task<ConnectionState> ConnectTask();
+        public abstract Task<bool> DataAvaliableAsync();
+        public async Task<ConnectionState> DisconnectAsync()
+        {
+            State = ConnectionState.Disconnecting;
+            try
+            {
+                State = await DisconnectTask();
+            }
+            catch (Exception ex)
+            {
+                //TODO:Log.Exception(ex);
+                throw ex;
+            }
+            return State;
+        }
+        protected abstract Task<ConnectionState> DisconnectTask();
+        public abstract void Dispose();
+
+        public async Task<Memory<byte>> ReadAsync(int bytesToRead, CancellationToken cancellationToken)
+        {
+            await PipeInit(cancellationToken);
+
+            Memory<byte> result = null;
+
+            Stopwatch outerStopwatch = new Stopwatch();
+            outerStopwatch.Start();
+            while (result.Length == 0)
+            {
+                ReadResult readResult = await Pipe.Reader.ReadAsync(cancellationToken);
+
+                ReadOnlySequence<byte> buffer = readResult.Buffer;
+
+                //Stopwatch innerStopwatch = new Stopwatch();
+                do
+                {
+                    //innerStopwatch.Start();
+                    if (buffer.Length >= bytesToRead)
+                    {
+                        result = new Memory<byte>(buffer.Slice(0, bytesToRead).ToArray());
+                        buffer = buffer.Slice(bytesToRead);
+                    }
+                    //if (innerStopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new TimeoutException("Rx inner timeout"); }
+                }
+                while (result.Length == 0);
+
+                // Tell the PipeReader how much of the buffer we have consumed
+                Pipe.Reader.AdvanceTo(buffer.Start, buffer.End);
+
+                // Stop reading if there's no more data coming
+                if (readResult.IsCompleted)
+                {
+                    break;
+                }
+
+                //if (outerStopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { throw new TimeoutException("Rx outer timeout"); }
+
+            }
+            return result;
+        }
+
+        public async Task<Memory<byte>> ReadAsync(byte endOfMessage, CancellationToken cancellationToken, bool includeChecksum = true)
+        {
+            await PipeInit(cancellationToken);
+
+            Memory<byte> result = null;
+
+            while (true)
+            {
+                ReadResult readResult = await Pipe.Reader.ReadAsync(cancellationToken);
+
+                ReadOnlySequence<byte> buffer = readResult.Buffer;
+                SequencePosition? position = null;
+
+                do
+                {
+                    // Look for a end of message token in the buffer
+                    position = buffer.PositionOf(endOfMessage);
+                    int checksumLength = includeChecksum == true ? Settings.Checksum.Length() : 0;
+
+                    if (position != null)
+                    {
+                        result = new Memory<byte>(buffer.Slice(0, position.Value.GetInteger() + 1 + checksumLength).ToArray());
+
+                        buffer = buffer.Slice(position.Value.GetInteger() + 1 + checksumLength);
+                    }
+                }
+                while (position == null);
+
+                // Tell the PipeReader how much of the buffer we have consumed
+                Pipe.Reader.AdvanceTo(buffer.Start, buffer.End);
+
+                // Stop reading if there's no more data coming
+                if (position != null || readResult.IsCompleted || readResult.IsCanceled)
+                {
+                    break;
+                }
+            }
+
+            // Mark the PipeReader as complete
+            Pipe.Reader.Complete();
+
+            return result;
+        }
+
+        protected abstract Task<int> ReadTask(Memory<byte> data, CancellationToken cancellationToken);
+        public async Task<bool> WriteAsync(Memory<byte> data, CancellationToken cancellationToken)
+        {
+            bool result = false;
+            try
+            {
+                await WriteTask(data, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                //TODO:Log.Exception(ex);
+                throw ex;
+            }
+            return result;
+        }
+        protected abstract Task<bool> WriteTask(Memory<byte> data, CancellationToken cancellationToken);
+
+        private async Task PipeInit(CancellationToken cancellationToken)
+        {
+            if (Pipe != null)
+            {
+                FlushResult flushResult = await Pipe.Writer.FlushAsync(cancellationToken);
+                if (flushResult.IsCompleted || flushResult.IsCanceled)
+                {
+                    Pipe = null;
+                }
+            }
+
+            if (Pipe == null)
+            {
+                Pipe = new Pipe();
+                PipeFill(Pipe.Writer, cancellationToken);
+            }
+        }
+        private async Task PipeFill(PipeWriter writer, CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                // Allocate bytes from the PipeWriter
+                Memory<byte> memory = writer.GetMemory(Settings.ReceiveBufferSize);
+                try
+                {
+                    if (await DataAvaliableAsync())
+                    {
+                        int bytesRead = await ReadTask(memory, cancellationToken);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+                        // Tell the PipeWriter how much was read from the Socket
+                        writer.Advance(bytesRead);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //TODO:Log.Exception(ex);
+                    break;
+                }
+
+                // Make the data available to the PipeReader
+                FlushResult result = await writer.FlushAsync();
+
+                // Is the reader still reading?
+                if (result.IsCompleted || result.IsCanceled)
+                {
+                    break;
+                }
+            }
+            // Tell the PipeReader that there's no more data coming
+            writer.Complete();
+        }
     }
 }
