@@ -5,28 +5,28 @@ namespace Toolbox.Checksum
 {
     public static class LrcExtensions
     {
-        public static byte ToByte(this byte[] toEncode)
+        public static byte LrcByte(this byte[] data)
         {
             byte LRC = 0;
-            for (int i = 0; i < toEncode.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
-                LRC ^= toEncode[i];
+                LRC ^= data[i];
             }
             return LRC;
         }
-        public static byte ToByte(this string toEncode)
+        public static byte LrcByte(this string data)
         {
-            return ToByte(Encoding.ASCII.GetBytes(toEncode));
+            return LrcByte(Encoding.ASCII.GetBytes(data));
         }
 
-        public static char ToChar(this byte[] toEncode)
+        public static char LrcChar(this byte[] data)
         {
-            return Convert.ToChar(ToByte(toEncode));
+            return Convert.ToChar(LrcByte(data));
         }
 
-        public static char ToChar(this string toEncode)
+        public static char LrcChar(this string data)
         {
-            return Convert.ToChar((ToByte(Encoding.ASCII.GetBytes(toEncode))));
+            return Convert.ToChar((LrcByte(Encoding.ASCII.GetBytes(data))));
         }
 
     }
