@@ -14,7 +14,7 @@ namespace Toolbox.Checksum.Test
         [DataRow(new byte[] { 48, 48, 48, 49, 65, 66, 48, 48, 50, 49, 48, 48, 70, 70, 50, 48, 67, 111, 114, 114, 32, 86, 111, 108, 117, 109, 101, 32, 32, 32, 32, 32, 32, 32, 32, 48, 48, 48, 114, 114, 32, 86, 111, 108, 117, 109, 101, 32, 32, 32, 32, 32, 32, 32, 32, 48, 48, 48, 48, 48, 48, 48, 48, 32, 32, 32, 32, 32 }, (byte)63, DisplayName = "Test byte[] Lrc - Test 4")]
         public void TestLrcChecksumBytesToByte(byte[] data, byte pExpectedResult)
         {
-            Assert.AreEqual(data.LrcByte(), pExpectedResult);
+            Assert.AreEqual(data.Lrc(), pExpectedResult);
         }
     }
 }

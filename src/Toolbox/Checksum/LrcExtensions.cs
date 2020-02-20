@@ -5,7 +5,7 @@ namespace Toolbox.Checksum
 {
     public static class LrcExtensions
     {
-        public static byte LrcByte(this byte[] data)
+        public static byte Lrc(this byte[] data)
         {
             byte LRC = 0;
             for (int i = 0; i < data.Length; i++)
