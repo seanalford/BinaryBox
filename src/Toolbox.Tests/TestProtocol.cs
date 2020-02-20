@@ -1,8 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Text;
 
-namespace Toolbox.Connection.Test
+namespace Toolbox.Protocol.Test
 {
     [TestClass]
     public class TestProtocol

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Checksum;
 
 namespace Toolbox.Connection
 {
@@ -17,7 +16,6 @@ namespace Toolbox.Connection
         Task<bool> DataAvaliableAsync();
         Task<ConnectionState> DisconnectAsync();
         Task<byte[]> ReadAsync(int bytesToRead, CancellationToken cancellationToken);
-        Task<byte[]> ReadAsync(byte endOfMessageToken, CancellationToken cancellationToken, bool IncludeChecksum = true);
         Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken);
     }
 
@@ -76,7 +74,7 @@ namespace Toolbox.Connection
 
         public async Task<byte[]> ReadAsync(int bytesToRead, CancellationToken cancellationToken)
         {
-            byte[] result = null;
+            byte[] result = new byte[0];
 
             PipeInit(cancellationToken);
 
@@ -84,11 +82,12 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCacncelOuterException(); }
                 if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { throw new ReadTimeoutOuterException(); Pipe.Reader.Complete(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadAsyncInner(bytesToRead, cancellationToken);
+                    result = await ReadBytesAsyncInner(bytesToRead, cancellationToken);
                 }
                 if (result?.Length == bytesToRead) break;
             }
@@ -96,7 +95,7 @@ namespace Toolbox.Connection
             return result;
         }
 
-        private async Task<byte[]> ReadAsyncInner(int bytesToRead, CancellationToken cancellationToken)
+        private async Task<byte[]> ReadBytesAsyncInner(int bytesToRead, CancellationToken cancellationToken)
         {
             byte[] result = new byte[0];
 
@@ -104,6 +103,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCacncelInnerException(); }
                 if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
@@ -128,61 +128,6 @@ namespace Toolbox.Connection
 
                 if (result?.Length == bytesToRead) break;
             }
-            return result;
-        }
-
-        public async Task<byte[]> ReadAsync(byte endOfMessage, CancellationToken cancellationToken, bool includeChecksum = true)
-        {
-            PipeInit(cancellationToken);
-
-            byte[] result = null;
-
-            Stopwatch outerStopwatch = new Stopwatch();
-            outerStopwatch.Start();
-            while (true)
-            {
-                if (outerStopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { throw new ReadTimeoutOuterException(); }
-
-                ReadResult readResult = await Pipe.Reader.ReadAsync(cancellationToken);
-
-                ReadOnlySequence<byte> buffer = readResult.Buffer;
-                SequencePosition? position = null;
-
-                if (!buffer.IsEmpty)
-                {
-                    Stopwatch innerStopwatch = new Stopwatch();
-                    innerStopwatch.Start();
-                    do
-                    {
-                        if (innerStopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
-                        innerStopwatch.Restart();
-
-                        // Look for a end of message token in the buffer
-                        position = buffer.PositionOf(endOfMessage);
-                        int checksumLength = includeChecksum == true ? Settings.Checksum.Length() : 0;
-
-                        if (position != null)
-                        {
-                            result = buffer.Slice(0, position.Value.GetInteger() + 1 + checksumLength).ToArray();
-                            buffer = buffer.Slice(position.Value.GetInteger() + 1 + checksumLength);
-                        }
-                    }
-                    while (position == null);
-
-                    // Tell the PipeReader how much of the buffer we have consumed
-                    Pipe.Reader.AdvanceTo(buffer.Start, buffer.End);
-
-                    // Stop reading if there's no more data coming
-                    if (position != null || readResult.IsCompleted || readResult.IsCanceled)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            // Mark the PipeReader as complete
-            Pipe.Reader.Complete();
-
             return result;
         }
 
