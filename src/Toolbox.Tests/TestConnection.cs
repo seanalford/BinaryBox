@@ -41,14 +41,14 @@ namespace Toolbox.Connection.Test
         {
             // Arrange            
             ConnectionFake connection;
+            connection = new ConnectionFake();
+            connection.ExpectedResult = true;
 
             // Act            
-            connection = new ConnectionFake();
-            connection.ConnectSuccess = true;
-            await connection.ConnectAsync();
+            ConnectionState result = await connection.ConnectAsync();
 
             // Asert            
-            Assert.IsTrue(connection.State == ConnectionState.Conneted);
+            Assert.IsTrue((result == ConnectionState.Conneted) && (connection.State == ConnectionState.Conneted));
         }
 
         [TestMethod]
@@ -56,11 +56,11 @@ namespace Toolbox.Connection.Test
         {
             // Arrange            
             ConnectionFake connection;
+            connection = new ConnectionFake();
+            connection.ExpectedResult = true;
+            connection.TaskDelay = 10;
 
             // Act            
-            connection = new ConnectionFake();
-            connection.RxTaskDelay = 10;
-            connection.ConnectSuccess = true;
             connection.ConnectAsync();
 
             // Asert            
@@ -72,10 +72,10 @@ namespace Toolbox.Connection.Test
         {
             // Arrange            
             ConnectionFake connection;
+            connection = new ConnectionFake();
+            connection.ExpectedResult = true;
 
             // Act            
-            connection = new ConnectionFake();
-            connection.ConnectSuccess = true;
             await connection.ConnectAsync();
             await connection.DisconnectAsync();
 
@@ -88,11 +88,11 @@ namespace Toolbox.Connection.Test
         {
             // Arrange            
             ConnectionFake connection;
+            connection = new ConnectionFake();
+            connection.ExpectedResult = true;
+            connection.TaskDelay = 10;
 
             // Act            
-            connection = new ConnectionFake();
-            connection.RxTaskDelay = 10;
-            connection.ConnectSuccess = true;
             await connection.ConnectAsync();
             connection.DisconnectAsync();
 
@@ -105,12 +105,13 @@ namespace Toolbox.Connection.Test
         {
             // Arrange            
             ConnectionFake connection;
-
-            // Act            
             connection = new ConnectionFake();
 
+            // Act            
+            bool dataAvaliable = await connection.DataAvaliableAsync();
+
             // Asert            
-            Assert.IsFalse(await connection.DataAvaliableAsync());
+            Assert.IsFalse(dataAvaliable);
         }
 
         [TestMethod]
@@ -139,10 +140,10 @@ namespace Toolbox.Connection.Test
             byte[] TxMessage = { 1, 2, 3, 4, 5 };
 
             // Act                        
-            await connection.WriteAsync(TxMessage, CancellationToken.None);
+            bool result = await connection.WriteAsync(TxMessage, CancellationToken.None);
 
             // Asert            
-            CollectionAssert.AreEqual(connection.TxBuffer, TxMessage);
+            Assert.IsTrue(result);
 
         }
 
@@ -159,7 +160,7 @@ namespace Toolbox.Connection.Test
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(rxMessage);
+            await connection.WriteToRxBuffer(rxMessage);
 
             // Act            
             var result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
@@ -180,7 +181,7 @@ namespace Toolbox.Connection.Test
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(rxMessage);
+            await connection.WriteToRxBuffer(rxMessage);
 
             // Act            
             var result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
@@ -204,7 +205,7 @@ namespace Toolbox.Connection.Test
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             byte[] result = new byte[0];
-            connection.WriteToRxBuffer(rxMessage, delay);
+            await connection.WriteToRxBuffer(rxMessage, delay);
 
             // Act
             result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
@@ -234,7 +235,7 @@ namespace Toolbox.Connection.Test
         }
 
         [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, 2, 1000, 1001, DisplayName = "Read 2 byte with 1000 millisecond RX delay")]
+        [DataRow(new byte[] { 1 }, 2, 1000, 1001, DisplayName = "Read 2 byte with 1000 millisecond RX delay")]
         [DataRow(new byte[] { 1, 2, 3, 4 }, 4, 1000, 1001, DisplayName = "Read 4 byte with 1000 millisecond RX delay")]
         [DataRow(new byte[] { 1, 2, 3, 4 }, 2, 2000, 2001, DisplayName = "Read 2 byte with 2000 millisecond RX delay")]
         [DataRow(new byte[] { 1, 2, 3, 4 }, 4, 2000, 2001, DisplayName = "Read 4 byte with 2000 millisecond RX delay")]
@@ -244,7 +245,7 @@ namespace Toolbox.Connection.Test
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutInner = timeout;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(rxMessage, delay);
+            await connection.WriteToRxBuffer(rxMessage, delay);
 
             // Act / Asert 
             await Assert.ThrowsExceptionAsync<ReadTimeoutInnerException>(async () =>
@@ -264,7 +265,7 @@ namespace Toolbox.Connection.Test
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(rxMessage, 5000);
+            await connection.WriteToRxBuffer(rxMessage, 5000);
 
             // Act / Asert 
             await Assert.ThrowsExceptionAsync<ReadCacncelOuterException>(async () =>
@@ -284,7 +285,7 @@ namespace Toolbox.Connection.Test
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(rxMessage);
+            await connection.WriteToRxBuffer(rxMessage);
 
             // Act / Asert 
             await Assert.ThrowsExceptionAsync<ReadCacncelInnerException>(async () =>
@@ -353,53 +354,118 @@ namespace Toolbox.Connection.Test
 
         public class ConnectionFake : Connection
         {
+            private HostFake Host;
             public int TaskDelay = 0;
-            public int RxTaskDelay = 0;
-            public int TxTaskDelay = 0;
-            public bool ConnectSuccess = false;
-            private byte[] RxBuffer = new byte[0];
-            public byte[] TxBuffer = new byte[0];
+            public bool ExpectedResult = false;
 
-            public ConnectionFake() : base() { }
+            public ConnectionFake() : base()
+            {
+                Host = new HostFake();
+            }
 
-            public ConnectionFake(IConnectionSettings settings) : base(settings) { }
+            public ConnectionFake(IConnectionSettings settings) : base(settings)
+            {
+                Host = new HostFake();
+            }
 
             public async override Task<bool> DataAvaliableAsync()
             {
-                await Task.Delay(TaskDelay);
-                bool result = false;
-                lock (RxBuffer)
-                {
-                    result = RxBuffer.Length > 0;
-                }
-                return result;
+                return await Host.DataAvaliable();
             }
 
             public override void Dispose()
             {
-                RxBuffer = null;
+                Host.Dispose();
             }
 
-            protected async override Task<ConnectionState> ConnectTask()
+            protected async override Task<bool> ConnectTask()
             {
-                await Task.Delay(TaskDelay);
-                ConnectionState result = ConnectionState.Disconnected;
-                if (ConnectSuccess)
-                {
-                    result = await Task.Run(() => ConnectionState.Conneted);
-                }
-                return result;
+                return await Host.ConnectAsync(TaskDelay, ExpectedResult);
             }
 
-            protected async override Task<ConnectionState> DisconnectTask()
+            protected async override Task<bool> DisconnectTask()
             {
-                await Task.Delay(TaskDelay);
-                return await Task.Run(() => ConnectionState.Disconnected);
+                return await Host.DisconnectAsync(TaskDelay, ExpectedResult);
             }
 
             protected async override Task<int> ReadTask(Memory<byte> data, CancellationToken cancellationToken)
             {
-                return await Task<int>.Run(() =>
+                int bytesRead = 0;
+                byte[] bytes = new byte[data.Length];
+
+                bytesRead = await Host.ReadAsync(bytes, cancellationToken);
+
+                bytes.CopyTo(data);
+
+                return bytesRead;
+            }
+
+            protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
+            {
+                return await Host.WriteAsync(data, cancellationToken);
+            }
+
+            public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0)
+            {
+                await Host.WriteToInputRxBuffer(data, delayPerByte);
+            }
+
+        }
+
+        public class HostFake : IDisposable
+        {
+            private bool Disposing = false;
+            private bool WriteToRxBufferRunning = false;
+            private int InputRxBufferDelay = 0;
+            private byte[] InputRxBuffer = new byte[0];
+            private byte[] RxBuffer = new byte[0];
+            private byte[] TxBuffer = new byte[0];
+
+            public HostFake()
+            {
+                WriteToRxBuffer();
+            }
+
+            public async Task<bool> ConnectAsync(int delay, bool result)
+            {
+                await Task.Delay(delay);
+                return result;
+            }
+
+            public async Task<bool> DataAvaliable()
+            {
+                return await Task.Run(() =>
+                {
+                    lock (RxBuffer)
+                    {
+                        return RxBuffer.Length > 0;
+
+                    }
+                });
+            }
+
+            public async Task<bool> DisconnectAsync(int delay, bool result)
+            {
+                await Task.Delay(delay);
+                return result;
+            }
+
+            public void Dispose()
+            {
+                Disposing = true;
+                Task.Run(() =>
+                {
+                    while (WriteToRxBufferRunning)
+                    {
+                        if (!WriteToRxBufferRunning) break;
+                    }
+
+                }).Wait();
+            }
+
+            public async Task<int> ReadAsync(byte[] data, CancellationToken cancellationToken)
+            {
+                return await Task.Run(() =>
                 {
                     int bytesRead = 0;
                     lock (RxBuffer)
@@ -407,42 +473,81 @@ namespace Toolbox.Connection.Test
                         if (RxBuffer?.Length > 0)
                         {
                             bytesRead = RxBuffer.Length;
-                            RxBuffer.CopyTo(data);
-                            Array.Copy(RxBuffer, 1, RxBuffer, 0, RxBuffer.Length - 1);
-                            System.Array.Resize<byte>(ref RxBuffer, RxBuffer.Length - bytesRead);
+                            RxBuffer.CopyTo(data, 0);
+                            Array.Resize(ref RxBuffer, 0);
                         }
                     }
+                    if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException();
                     return bytesRead;
                 });
             }
 
-            public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0)
+            public async Task WriteToInputRxBuffer(byte[] data, int delayPerByte = 0)
             {
-                await Task.Run(async () =>
+                await Task.Run(() =>
                 {
-                    for (int i = 0; i < data.Length; i++)
+                    while (true)
                     {
-                        await Task.Delay(delayPerByte);
-                        lock (RxBuffer)
+                        lock (InputRxBuffer)
                         {
-                            Array.Resize<byte>(ref RxBuffer, RxBuffer.Length + 1);
-                            Array.Copy(data, i, RxBuffer, RxBuffer.Length - 1, 1);
+                            if (InputRxBuffer.Length == 0)
+                            {
+                                InputRxBufferDelay = delayPerByte;
+                                Array.Resize(ref InputRxBuffer, data.Length);
+                                data.CopyTo(InputRxBuffer, 0);
+                                break;
+                            }
                         }
                     }
                 });
             }
 
-            protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
+            private void WriteToRxBuffer()
             {
-                await Task.Delay(TxTaskDelay);
-                await Task.Run(() =>
+                WriteToRxBufferRunning = true;
+                try
                 {
-                    TxBuffer = new byte[data.Length];
-                    data.CopyTo(TxBuffer, 0);
-                });
-                return true;
+                    Task.Run(async () =>
+                    {
+                        while (!Disposing)
+                        {
+                            if (InputRxBuffer.Length > 0)
+                            {
+                                for (int i = 0; i < InputRxBuffer.Length; i++)
+                                {
+                                    await Task.Delay(InputRxBufferDelay);
+                                    lock (InputRxBuffer)
+                                    {
+                                        lock (RxBuffer)
+                                        {
+                                            Array.Resize(ref RxBuffer, RxBuffer.Length + 1);
+                                            Array.Copy(InputRxBuffer, i, RxBuffer, RxBuffer.Length - 1, 1);
+                                        }
+                                    }
+                                }
+                                Array.Resize(ref InputRxBuffer, 0);
+                            }
+                        }
+                    });
+                }
+                finally
+                {
+                    WriteToRxBufferRunning = false;
+                }
             }
-        }
 
+            public async Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken)
+            {
+                return await Task.Run(() =>
+                {
+                    Array.Resize(ref TxBuffer, data.Length);
+                    data.CopyTo(TxBuffer, 0);
+                    if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException();
+                    return true;
+                });
+            }
+
+
+        }
     }
 }
