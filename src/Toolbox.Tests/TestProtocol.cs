@@ -1,12 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Toolbox.Protocol.Test
 {
-    [TestClass]
     public class TestProtocol
     {
-
-        [TestMethod]
+        [Fact]
         public void TestProtocolClient()
         {
 

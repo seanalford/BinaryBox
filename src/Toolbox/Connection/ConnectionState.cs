@@ -8,7 +8,7 @@ namespace Toolbox.Connection
     {
         Disconnected,
         Connecting,
-        Conneted,
+        Connected,
         Disconnecting
     };
 }
