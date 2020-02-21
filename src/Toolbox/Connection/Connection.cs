@@ -44,7 +44,8 @@ namespace Toolbox.Connection
             State = ConnectionState.Connecting;
             try
             {
-                State = await ConnectTask();
+                bool state = await ConnectTask().ConfigureAwait(false);
+                State = state == true ? ConnectionState.Conneted : ConnectionState.Disconnected;
             }
             catch (Exception ex)
             {
@@ -53,14 +54,16 @@ namespace Toolbox.Connection
             }
             return State;
         }
-        protected abstract Task<ConnectionState> ConnectTask();
+        protected abstract Task<bool> ConnectTask();
         public abstract Task<bool> DataAvaliableAsync();
         public async Task<ConnectionState> DisconnectAsync()
         {
             State = ConnectionState.Disconnecting;
             try
             {
-                State = await DisconnectTask();
+                bool state = await DisconnectTask().ConfigureAwait(false);
+                State = state == true ? ConnectionState.Disconnected : ConnectionState.Conneted;
+
             }
             catch (Exception ex)
             {
@@ -69,7 +72,7 @@ namespace Toolbox.Connection
             }
             return State;
         }
-        protected abstract Task<ConnectionState> DisconnectTask();
+        protected abstract Task<bool> DisconnectTask();
         public abstract void Dispose();
 
         public async Task<byte[]> ReadAsync(int bytesToRead, CancellationToken cancellationToken)
@@ -87,7 +90,7 @@ namespace Toolbox.Connection
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadBytesAsyncInner(bytesToRead, cancellationToken);
+                    result = await ReadBytesAsyncInner(bytesToRead, cancellationToken).ConfigureAwait(false);
                 }
                 if (result?.Length == bytesToRead) break;
             }
@@ -137,7 +140,7 @@ namespace Toolbox.Connection
             bool result = false;
             try
             {
-                await WriteTask(data, cancellationToken);
+                await WriteTask(data, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -161,13 +164,13 @@ namespace Toolbox.Connection
         {
             while (true)
             {
-                if (await DataAvaliableAsync())
+                if (await DataAvaliableAsync().ConfigureAwait(false))
                 {
                     // Allocate bytes from the PipeWriter
                     Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReceiveBufferSize);
                     try
                     {
-                        int bytesRead = await ReadTask(memory, cancellationToken);
+                        int bytesRead = await ReadTask(memory, cancellationToken).ConfigureAwait(false);
                         //if (bytesRead == 0)
                         //{
                         //    break;
@@ -183,7 +186,7 @@ namespace Toolbox.Connection
                 }
 
                 // Make the data available to the PipeReader
-                FlushResult result = await Pipe.Writer.FlushAsync();
+                FlushResult result = await Pipe.Writer.FlushAsync().ConfigureAwait(false);
 
                 // Is the reader still reading?
                 if (result.IsCompleted)
