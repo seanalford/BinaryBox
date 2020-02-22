@@ -1,12 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Toolbox.Connection.Tcp.Test
 {
-    [TestClass]
     public class TestConnectionTcp
     {
-
-        [TestMethod]
+        [Fact]
         public void TestConnectionTcpOpen()
         {
 

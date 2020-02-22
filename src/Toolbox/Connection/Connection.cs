@@ -8,17 +8,6 @@ using System.Threading.Tasks;
 
 namespace Toolbox.Connection
 {
-    public interface IConnection : IDisposable
-    {
-        IConnectionSettings Settings { get; set; }
-        ConnectionState State { get; }
-        Task<ConnectionState> ConnectAsync();
-        Task<bool> DataAvaliableAsync();
-        Task<ConnectionState> DisconnectAsync();
-        Task<byte[]> ReadAsync(int bytesToRead, CancellationToken cancellationToken);
-        Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken);
-    }
-
     public abstract class Connection : IConnection
     {
         private Pipe Pipe = null;
@@ -45,7 +34,7 @@ namespace Toolbox.Connection
             try
             {
                 bool state = await ConnectTask().ConfigureAwait(false);
-                State = state == true ? ConnectionState.Conneted : ConnectionState.Disconnected;
+                State = state == true ? ConnectionState.Connected : ConnectionState.Disconnected;
             }
             catch (Exception ex)
             {
@@ -54,15 +43,16 @@ namespace Toolbox.Connection
             }
             return State;
         }
+
         protected abstract Task<bool> ConnectTask();
-        public abstract Task<bool> DataAvaliableAsync();
+        public abstract Task<bool> DataAvailableAsync();
         public async Task<ConnectionState> DisconnectAsync()
         {
             State = ConnectionState.Disconnecting;
             try
             {
                 bool state = await DisconnectTask().ConfigureAwait(false);
-                State = state == true ? ConnectionState.Disconnected : ConnectionState.Conneted;
+                State = state == true ? ConnectionState.Disconnected : ConnectionState.Connected;
 
             }
             catch (Exception ex)
@@ -85,7 +75,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCacncelOuterException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
                 if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { throw new ReadTimeoutOuterException(); Pipe.Reader.Complete(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
@@ -106,7 +96,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCacncelInnerException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
                 if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
@@ -164,7 +154,7 @@ namespace Toolbox.Connection
         {
             while (true)
             {
-                if (await DataAvaliableAsync().ConfigureAwait(false))
+                if (await DataAvailableAsync().ConfigureAwait(false))
                 {
                     // Allocate bytes from the PipeWriter
                     Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReceiveBufferSize);

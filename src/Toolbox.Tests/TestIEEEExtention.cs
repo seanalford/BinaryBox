@@ -1,20 +1,20 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using FluentAssertions;
+using Xunit;
 
 namespace Toolbox.IEEE.Test
 {
-    [TestClass]
     public class TestToolboxExtentionsIEEE
     {
 
-        [DataTestMethod]
-        [DataRow(float.PositiveInfinity, "7F800000", DisplayName = "Positive Infinity ")]
-        [DataRow(float.NegativeInfinity, "FF800000", DisplayName = "Negative Infinity")]
-        [DataRow(float.MaxValue,         "7F7FFFFF", DisplayName = "Maximum Positive Value")]
-        [DataRow(float.MinValue,         "FF7FFFFF", DisplayName = "Maximum Negative Value")]
-        [DataRow(float.Epsilon,          "00000001", DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow(-float.Epsilon,         "80000001", DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow(0,                      "00000000", DisplayName = "Zero")]
+        [Theory]
+        [InlineData(float.PositiveInfinity, "7F800000")]
+        [InlineData(float.NegativeInfinity, "FF800000")]
+        [InlineData(float.MaxValue,         "7F7FFFFF")]
+        [InlineData(float.MinValue,         "FF7FFFFF")]
+        [InlineData(float.Epsilon,          "00000001")]
+        [InlineData(-float.Epsilon,         "80000001")]
+        [InlineData(0,                      "00000000")]
 
         public void IEEE_Float_To_4Byte_String_BigEndian(float inputValue, string expectedString)
         {
@@ -25,19 +25,17 @@ namespace Toolbox.IEEE.Test
             actualString = inputValue.ToIEEEString();
 
             //Assert
-            Assert.AreEqual(expectedString, actualString);
-            
+            actualString.Should().Be(expectedString);
         }
 
-
-        [DataTestMethod]
-        [DataRow(float.PositiveInfinity, "0000807F", DisplayName = "Positive Infinity ")]
-        [DataRow(float.NegativeInfinity, "000080FF", DisplayName = "Negative Infinity")]
-        [DataRow(float.MaxValue,         "FFFF7F7F", DisplayName = "Maximum Positive Value")]
-        [DataRow(float.MinValue,         "FFFF7FFF", DisplayName = "Maximum Negative Value")]
-        [DataRow(float.Epsilon,          "01000000", DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow(-float.Epsilon,         "01000080", DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow(0,                      "00000000", DisplayName = "Zero")]
+        [Theory]
+        [InlineData(float.PositiveInfinity, "0000807F")]
+        [InlineData(float.NegativeInfinity, "000080FF")]
+        [InlineData(float.MaxValue,         "FFFF7F7F")]
+        [InlineData(float.MinValue,         "FFFF7FFF")]
+        [InlineData(float.Epsilon,          "01000000")]
+        [InlineData(-float.Epsilon,         "01000080")]
+        [InlineData(0,                      "00000000")]
 
         public void IEEE_Float_To_4Byte_String_LittleEndian(float inputValue, string expectedString)
         {
@@ -48,11 +46,10 @@ namespace Toolbox.IEEE.Test
             actualString = inputValue.ToIEEEString(true);
 
             //Assert
-            Assert.AreEqual(expectedString, actualString);
-
+            actualString.Should().Be(expectedString);
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNFloat_To_4Byte_String_BigEndian()
         {
             //Arrange 
@@ -63,11 +60,10 @@ namespace Toolbox.IEEE.Test
             actualString = float.NaN.ToIEEEString();
 
             //Assert
-            Assert.AreEqual(NanString, actualString);
-
+            actualString.Should().Be(NanString);
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNFloat_To_4Byte_String_LittleEndian()
         {
             //Arrange 
@@ -78,19 +74,18 @@ namespace Toolbox.IEEE.Test
             actualString = float.NaN.ToIEEEString(true);
 
             //Assert
-            Assert.AreEqual(NanString, actualString);
-
+            actualString.Should().Be(NanString);
         }
 
-        [DataTestMethod]
-        [DataRow("7F800000", float.PositiveInfinity, DisplayName = "Positive Infinity ")]
-        [DataRow("FF800000", float.NegativeInfinity, DisplayName = "Negative Infinity")]
-        [DataRow("7F7FFFFF", float.MaxValue, DisplayName = "Maximum Positive Value")]
-        [DataRow("FF7FFFFF", float.MinValue, DisplayName = "Maximum Negative Value")]
-        [DataRow("00000001", float.Epsilon, DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow("80000001", -float.Epsilon, DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow("00000000", 0, DisplayName = "Positive Zero")]
-        [DataRow("80000000", 0, DisplayName = "Negative Zero")]
+        [Theory]
+        [InlineData("7F800000", float.PositiveInfinity)]
+        [InlineData("FF800000", float.NegativeInfinity)]
+        [InlineData("7F7FFFFF", float.MaxValue)]
+        [InlineData("FF7FFFFF", float.MinValue)]
+        [InlineData("00000001", float.Epsilon)]
+        [InlineData("80000001", -float.Epsilon)]
+        [InlineData("00000000", 0)]
+        [InlineData("80000000", 0)]
         public void IEEE_4Bytes_String_To_Float_BigEndian(string inputString, float expectedFloat)
         {
             //Arrange
@@ -100,18 +95,18 @@ namespace Toolbox.IEEE.Test
             actualFloat = inputString.ToFloat();
 
             //Assert
-            Assert.AreEqual(expectedFloat, actualFloat);
+            actualFloat.Should().Be(expectedFloat);
         }
 
-        [DataTestMethod]
-        [DataRow("0000807F", float.PositiveInfinity, DisplayName = "Positive Infinity ")]
-        [DataRow("000080FF", float.NegativeInfinity, DisplayName = "Negative Infinity")]
-        [DataRow("FFFF7F7F", float.MaxValue, DisplayName = "Maximum Positive Value")]
-        [DataRow("FFFF7FFF", float.MinValue, DisplayName = "Maximum Negative Value")]
-        [DataRow("01000000", float.Epsilon, DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow("01000080", -float.Epsilon, DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow("00000000", 0, DisplayName = "Positive Zero")]
-        [DataRow("00000080", 0, DisplayName = "Negative Zero")]
+        [Theory]
+        [InlineData("0000807F", float.PositiveInfinity)]
+        [InlineData("000080FF", float.NegativeInfinity)]
+        [InlineData("FFFF7F7F", float.MaxValue)]
+        [InlineData("FFFF7FFF", float.MinValue)]
+        [InlineData("01000000", float.Epsilon)]
+        [InlineData("01000080", -float.Epsilon)]
+        [InlineData("00000000", 0)]
+        [InlineData("00000080", 0)]
         public void IEEE_4Bytes_String_To_Float_LittleEndian(string inputArray, float expectedFloat)
         {
             //Arrange
@@ -121,10 +116,10 @@ namespace Toolbox.IEEE.Test
             actualFloat = inputArray.ToFloat(true);
 
             //Assert
-            Assert.AreEqual(expectedFloat, actualFloat);
-
+            actualFloat.Should().Be(expectedFloat);
         }
-        [TestMethod]
+
+        [Fact]
         public void IEEE_NaNString_To_Float_BigEndian()
         {
             //Arrange 
@@ -135,11 +130,10 @@ namespace Toolbox.IEEE.Test
             actualValue = NanString.ToFloat();
 
             //Assert
-            Assert.IsTrue(Single.IsNaN(actualValue));
-
+            Single.IsNaN(actualValue).Should().BeTrue();
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNString_To_Float_LittleEndian()
         {
             //Arrange 
@@ -150,19 +144,17 @@ namespace Toolbox.IEEE.Test
             actualValue = NanString.ToFloat(true);
 
             //Assert
-            Assert.IsTrue(Single.IsNaN(actualValue));
-
+            Single.IsNaN(actualValue).Should().BeTrue();
         }
 
-        [DataTestMethod]
-        [DataRow(double.PositiveInfinity, "7FF0000000000000", DisplayName = "Positive Infinity ")]
-        [DataRow(double.NegativeInfinity, "FFF0000000000000", DisplayName = "Negative Infinity")]
-        [DataRow(double.MaxValue, "7FEFFFFFFFFFFFFF", DisplayName = "Maximum Positive Value")]
-        [DataRow(double.MinValue, "FFEFFFFFFFFFFFFF", DisplayName = "Maximum Negative Value")]
-        [DataRow(double.Epsilon, "0000000000000001", DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow(-double.Epsilon, "8000000000000001", DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow(0, "0000000000000000", DisplayName = "Zero")]
-
+        [Theory]
+        [InlineData(double.PositiveInfinity, "7FF0000000000000")]
+        [InlineData(double.NegativeInfinity, "FFF0000000000000")]
+        [InlineData(double.MaxValue, "7FEFFFFFFFFFFFFF")]
+        [InlineData(double.MinValue, "FFEFFFFFFFFFFFFF")]
+        [InlineData(double.Epsilon, "0000000000000001")]
+        [InlineData(-double.Epsilon, "8000000000000001")]
+        [InlineData(0, "0000000000000000")]
         public void IEEE_Float_To_8Byte_String_BigEndian(double inputValue, string expectedString)
         {
             //Arrange
@@ -172,18 +164,17 @@ namespace Toolbox.IEEE.Test
             actualString = inputValue.ToIEEEString();
 
             //Assert
-            Assert.AreEqual(expectedString, actualString);
-
+            actualString.Should().Be(expectedString);
         }
 
-        [DataTestMethod]
-        [DataRow(double.PositiveInfinity, "000000000000F07F", DisplayName = "Positive Infinity ")]
-        [DataRow(double.NegativeInfinity, "000000000000F0FF", DisplayName = "Negative Infinity")]
-        [DataRow(double.MaxValue, "FFFFFFFFFFFFEF7F", DisplayName = "Maximum Positive Value")]
-        [DataRow(double.MinValue, "FFFFFFFFFFFFEFFF", DisplayName = "Maximum Negative Value")]
-        [DataRow(double.Epsilon, "0100000000000000", DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow(-double.Epsilon, "0100000000000080", DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow(0, "0000000000000000", DisplayName = "Zero")]
+        [Theory]
+        [InlineData(double.PositiveInfinity, "000000000000F07F")]
+        [InlineData(double.NegativeInfinity, "000000000000F0FF")]
+        [InlineData(double.MaxValue, "FFFFFFFFFFFFEF7F")]
+        [InlineData(double.MinValue, "FFFFFFFFFFFFEFFF")]
+        [InlineData(double.Epsilon, "0100000000000000")]
+        [InlineData(-double.Epsilon, "0100000000000080")]
+        [InlineData(0, "0000000000000000")]
 
         public void IEEE_Float_To_8Byte_String_LittleEndian(double inputValue, string expectedString)
         {
@@ -194,10 +185,10 @@ namespace Toolbox.IEEE.Test
             actualString = inputValue.ToIEEEString(true);
 
             //Assert
-            Assert.AreEqual(expectedString, actualString);
+            actualString.Should().Be(expectedString);
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNString_To_Double_BigEndian()
         {
             //Arrange 
@@ -208,11 +199,10 @@ namespace Toolbox.IEEE.Test
             actualValue = NanString.ToDouble();
 
             //Assert
-            Assert.IsTrue(double.IsNaN(actualValue));
-
+            double.IsNaN(actualValue).Should().BeTrue();
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNString_To_Double_LittleEndian()
         {
             //Arrange 
@@ -223,17 +213,16 @@ namespace Toolbox.IEEE.Test
             actualValue = NanString.ToDouble(true);
 
             //Assert
-            Assert.IsTrue(double.IsNaN(actualValue));
-
+            double.IsNaN(actualValue).Should().BeTrue();
         }
-        [DataTestMethod]
-        [DataRow("7FF0000000000000", double.PositiveInfinity, DisplayName = "Positive Infinity ")]
-        [DataRow("FFF0000000000000", double.NegativeInfinity, DisplayName = "Negative Infinity")]
-        [DataRow("7FEFFFFFFFFFFFFF", double.MaxValue, DisplayName = "Maximum Positive Value")]
-        [DataRow("FFEFFFFFFFFFFFFF", double.MinValue, DisplayName = "Maximum Negative Value")]
-        [DataRow("0000000000000001", double.Epsilon, DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow("8000000000000001", -double.Epsilon, DisplayName = "Minimum Negative Subnormal Value")]
 
+        [Theory]
+        [InlineData("7FF0000000000000", double.PositiveInfinity)]
+        [InlineData("FFF0000000000000", double.NegativeInfinity)]
+        [InlineData("7FEFFFFFFFFFFFFF", double.MaxValue)]
+        [InlineData("FFEFFFFFFFFFFFFF", double.MinValue)]
+        [InlineData("0000000000000001", double.Epsilon)]
+        [InlineData("8000000000000001", -double.Epsilon)]
         public void IEEE_8Byte_String_To_Float_BigEndian(string inputString, double expectedDouble)
         {
             //Arrange
@@ -243,20 +232,18 @@ namespace Toolbox.IEEE.Test
             actualDouble = inputString.ToDouble();
 
             //Assert
-            Assert.AreEqual(expectedDouble, actualDouble);
-
+            actualDouble.Should().Be(expectedDouble);
         }
 
-        [DataTestMethod]
-        [DataRow("000000000000F07F", double.PositiveInfinity, DisplayName = "Positive Infinity ")]
-        [DataRow("000000000000F0FF", double.NegativeInfinity, DisplayName = "Negative Infinity")]
-        [DataRow("FFFFFFFFFFFFEF7F", double.MaxValue, DisplayName = "Maximum Positive Value")]
-        [DataRow("FFFFFFFFFFFFEFFF", double.MinValue, DisplayName = "Maximum Negative Value")]
-        [DataRow("0100000000000000", double.Epsilon, DisplayName = "Minimum Positive Subnormal Value")]
-        [DataRow("0100000000000080", -double.Epsilon, DisplayName = "Minimum Negative Subnormal Value")]
-        [DataRow("0000000000000000", 0, DisplayName = "Positive Zero")]
-        [DataRow("0000000000000080", 0, DisplayName = "Negative Zero")]
-
+        [Theory]
+        [InlineData("000000000000F07F", double.PositiveInfinity)]
+        [InlineData("000000000000F0FF", double.NegativeInfinity)]
+        [InlineData("FFFFFFFFFFFFEF7F", double.MaxValue)]
+        [InlineData("FFFFFFFFFFFFEFFF", double.MinValue)]
+        [InlineData("0100000000000000", double.Epsilon)]
+        [InlineData("0100000000000080", -double.Epsilon)]
+        [InlineData("0000000000000000", 0)]
+        [InlineData("0000000000000080", 0)]
         public void IEEE_8Byte_String_To_Float_LittleEndian(string inputString, double expectedDouble)
         {
             //Arrange
@@ -266,11 +253,10 @@ namespace Toolbox.IEEE.Test
             actualDouble = inputString.ToDouble(true);
 
             //Assert
-            Assert.AreEqual(expectedDouble, actualDouble);
-
+            actualDouble.Should().Be(expectedDouble);
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNDouble_To_8Byte_String_BigEndian()
         {
             //Arrange 
@@ -281,11 +267,10 @@ namespace Toolbox.IEEE.Test
             actualString = double.NaN.ToIEEEString();
 
             //Assert
-            Assert.AreEqual(NanString, actualString);
-
+            actualString.Should().Be(NanString);
         }
 
-        [TestMethod]
+        [Fact]
         public void IEEE_NaNDouble_To_8Byte_String_LittleEndian()
         {
             //Arrange 
@@ -296,8 +281,7 @@ namespace Toolbox.IEEE.Test
             actualString = double.NaN.ToIEEEString(true);
 
             //Assert
-            Assert.AreEqual(NanString, actualString);
-
+            actualString.Should().Be(NanString);
         }
     }
 }

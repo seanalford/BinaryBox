@@ -1,27 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
+using Xunit;
 
 namespace Toolbox.Connection.Test
 {
-    [TestClass]
     public class TestConnection
     {
-
-        [TestMethod]
+        [Fact]
         public void TestConnectionCreationWithoutSettings()
         {
-            // Arrange
-            IConnection connection;
-            // Act
-            connection = new ConnectionFake();
+            // Arrange, Act
+            IConnection connection = new ConnectionFake();
 
-            // Asert
-            Assert.IsTrue(connection is IConnection);
+            // Assert
+            connection.Should().BeAssignableTo<IConnection>();
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConnectionCreationWithSettings()
         {
             // Arrange
@@ -32,172 +29,158 @@ namespace Toolbox.Connection.Test
             connectionSettings = new ConnectionSettings();
             connection = new ConnectionFake(connectionSettings);
 
-            // Asert
-            Assert.IsTrue(connection is IConnection);
+            // Assert
+            connection.Should().BeAssignableTo<IConnection>();
         }
 
-        [TestMethod]
+        [Fact]
         public async Task TestConnectionConnectAsync()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
-            connection.ExpectedResult = true;
+            // Arrange
+            var connection = new ConnectionFake { ExpectedResult = true };
 
-            // Act            
+            // Act
             ConnectionState result = await connection.ConnectAsync();
 
-            // Asert            
-            Assert.IsTrue((result == ConnectionState.Conneted) && (connection.State == ConnectionState.Conneted));
+            // Assert
+            result.Should().Be(ConnectionState.Connected);
         }
 
-        [TestMethod]
-        public void TestConnectionConnectAsyncWithDelay()
+        [Fact]
+        public async Task TestConnectionConnectAsyncWithDelay()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
-            connection.ExpectedResult = true;
-            connection.TaskDelay = 10;
+            // Arrange
+            var connection = new ConnectionFake { ExpectedResult = true, TaskDelay = 10 };
 
-            // Act            
-            connection.ConnectAsync();
+            // Act
+            await connection.ConnectAsync();
 
-            // Asert            
-            Assert.IsTrue(connection.State == ConnectionState.Connecting);
+            // Assert
+            connection.State.Should().Be(ConnectionState.Connected);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task TestConnectionDisconnectAsync()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
-            connection.ExpectedResult = true;
+            // Arrange
+            var connection = new ConnectionFake { ExpectedResult = true };
 
-            // Act            
+            // Act
             await connection.ConnectAsync();
             await connection.DisconnectAsync();
 
-            // Asert            
-            Assert.IsTrue(connection.State == ConnectionState.Disconnected);
+            // Assert
+            connection.State.Should().Be(ConnectionState.Disconnected);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task TestConnectionDisconnectAsyncWithDelay()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
-            connection.ExpectedResult = true;
-            connection.TaskDelay = 10;
+            // Arrange
+            var connection = new ConnectionFake { ExpectedResult = true, TaskDelay = 10 };
 
-            // Act            
+            // Act
             await connection.ConnectAsync();
-            connection.DisconnectAsync();
+            await connection.DisconnectAsync();
 
-            // Asert            
-            Assert.IsTrue(connection.State == ConnectionState.Disconnecting);
+            // Assert
+            connection.State.Should().Be(ConnectionState.Disconnecting);
         }
 
-        [TestMethod]
-        public async Task TestConnectionNoDataAvaliable()
+        [Fact]
+        public async Task TestConnectionNoDataAvailable()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
+            // Arrange
+            var connection = new ConnectionFake();
 
-            // Act            
-            bool dataAvaliable = await connection.DataAvaliableAsync();
+            // Act
+            var result = await connection.DataAvailableAsync();
 
-            // Asert            
-            Assert.IsFalse(dataAvaliable);
+            // Assert
+            result.Should().BeFalse();
         }
 
-        [TestMethod]
-        public async Task TestConnectionDataAvaliable()
+        [Fact]
+        public async Task TestConnectionDataAvailable()
         {
-            // Arrange            
+            // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
-            connection.WriteToRxBuffer(new byte[] { 1 });
 
-            // Act            
-            bool dataAvaliable = await connection.DataAvaliableAsync();
+            // Act
+            await connection.WriteToRxBuffer(new byte[] {1});
+            bool dataAvailable = await connection.DataAvailableAsync();
 
-            // Asert            
-            Assert.IsTrue(dataAvaliable);
+            // Assert
+            dataAvailable.Should().BeTrue();
         }
 
-        [TestMethod]
+        [Fact]
         public async Task TestConnectionWriteAsync()
         {
-            // Arrange            
-            ConnectionFake connection;
-            connection = new ConnectionFake();
-            byte[] TxMessage = { 1, 2, 3, 4, 5 };
+            // Arrange
+            var connection = new ConnectionFake();
+            byte[] txMessage = {1, 2, 3, 4, 5};
 
-            // Act                        
-            bool result = await connection.WriteAsync(TxMessage, CancellationToken.None);
+            // Act
+            bool result = await connection.WriteAsync(txMessage, CancellationToken.None);
 
-            // Asert            
-            Assert.IsTrue(result);
-
+            // Assert
+            result.Should().BeTrue();
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5 }, 1, new byte[] { 1 }, DisplayName = "Read 1 byte")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5 }, 2, new byte[] { 1, 2 }, DisplayName = "Read 2 bytes")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5 }, 3, new byte[] { 1, 2, 3 }, DisplayName = "Read 3 bytes")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5 }, 4, new byte[] { 1, 2, 3, 4 }, DisplayName = "Read 4 bytes")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5 }, 5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "Read 5 bytes")]
+        [Theory]
+        [InlineData(new byte[] {1, 2, 3, 4, 5}, 1, new byte[] {1})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5}, 2, new byte[] {1, 2})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5}, 3, new byte[] {1, 2, 3})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5}, 4, new byte[] {1, 2, 3, 4})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5}, 5, new byte[] {1, 2, 3, 4, 5})]
         public async Task TestConnectionReadAsyncBytes(byte[] rxMessage, int bytesToRead, byte[] expectedResult)
         {
-            // Arrange                            
+            // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
-            // Act            
+            // Act
             var result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
 
-            // Asert     
-            CollectionAssert.AreEqual(expectedResult, result);
-
+            // Assert
+            result.Should().BeEquivalentTo(expectedResult);
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 1, new byte[] { 2 }, DisplayName = "Read 1 byte 2 times")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 2, new byte[] { 3, 4 }, DisplayName = "Read 2 byte 2 times")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 3, new byte[] { 4, 5, 6 }, DisplayName = "Read 3 byte 2 times")]
+        [Theory]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 1, new byte[] {2})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 2, new byte[] {3, 4})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 3, new byte[] {4, 5, 6})]
         public async Task TestConnectionReadAsyncMultiBytes(byte[] rxMessage, int bytesToRead, byte[] expectedResult)
         {
-            // Arrange                            
+            // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
-            // Act            
+            // Act
             var result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
             result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
 
-            // Asert     
-            CollectionAssert.AreEqual(expectedResult, result);
-
+            // Assert
+            result.Should().BeEquivalentTo(expectedResult);
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 10, new byte[] { 2 }, DisplayName = "Read 1 byte 2 times with 10 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 4, 10, new byte[] { 5, 6, 7, 8 }, DisplayName = "Read 4 byte 2 times with 10 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 250, new byte[] { 2 }, DisplayName = "Read 1 byte 2 times with 500 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 4, 250, new byte[] { 5, 6, 7, 8 }, DisplayName = "Read 4 byte 2 times with 500 millisecond RX delay")]
-        public async Task TestConnectionReadAsyncMultiBytesWithDelay(byte[] rxMessage, int bytesToRead, int delay, byte[] expectedResult)
+        [Theory]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 1, 10, new byte[] {2})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 4, 10, new byte[] {5, 6, 7, 8})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 1, 250, new byte[] {2})]
+        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 4, 250, new byte[] {5, 6, 7, 8})]
+        public async Task TestConnectionReadAsyncMultiBytesWithDelay(byte[] rxMessage, int bytesToRead, int delay,
+            byte[] expectedResult)
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
@@ -211,130 +194,127 @@ namespace Toolbox.Connection.Test
             result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
             result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
 
-            // Asert
-            CollectionAssert.AreEqual(expectedResult, result);
+            // Assert
+            result.Should().BeEquivalentTo(expectedResult);
 
         }
 
-        [DataTestMethod]
-        [Timeout(5000)]
-        [DataRow(1000, DisplayName = "Test ReadAsync(bytesToRead) outer timeout.")]
+        [Theory(DisplayName = "Test ReadAsync(bytesToRead) outer timeout.")]
+        [InlineData(1000)]
         public async Task TestConnectionReadAsyncBytesOuterTimeouts(int timeout)
         {
-            // Arrange                            
+            // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = timeout;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
 
-            // Act / Asert 
-            await Assert.ThrowsExceptionAsync<ReadTimeoutOuterException>(async () =>
-            {
-                var result = await connection.ReadAsync(1, CancellationToken.None);
-            });
+            // Act
+            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, CancellationToken.None));
 
+            // Assert
+            result.Should().BeOfType<ReadTimeoutOuterException>();
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1 }, 2, 1000, 1001, DisplayName = "Read 2 byte with 1000 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, 4, 1000, 1001, DisplayName = "Read 4 byte with 1000 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, 2, 2000, 2001, DisplayName = "Read 2 byte with 2000 millisecond RX delay")]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, 4, 2000, 2001, DisplayName = "Read 4 byte with 2000 millisecond RX delay")]
+        [Theory]
+        [InlineData(new byte[] { 1 }, 2, 1000, 1001)]
+        [InlineData(new byte[] { 1, 2, 3, 4 }, 4, 1000, 1001)]
+        [InlineData(new byte[] { 1, 2, 3, 4 }, 2, 2000, 2001)]
+        [InlineData(new byte[] { 1, 2, 3, 4 }, 4, 2000, 2001)]
         public async Task TestConnectionReadAsyncBytesInnerTimeout(byte[] rxMessage, int bytesToRead, int timeout, int delay)
         {
-            // Arrange          
+            // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutInner = timeout;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             await connection.WriteToRxBuffer(rxMessage, delay);
 
-            // Act / Asert 
-            await Assert.ThrowsExceptionAsync<ReadTimeoutInnerException>(async () =>
-            {
-                var result = await connection.ReadAsync(bytesToRead, CancellationToken.None);
-            });
+            // Act
+            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(bytesToRead, CancellationToken.None));
 
+            // Assert
+            result.Should().BeOfType<ReadTimeoutInnerException>();
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, DisplayName = "Read 2 byte with 1000 millisecond RX delay")]
+        [Theory]
+        [InlineData(new byte[] {1, 2, 3, 4})]
         public async Task TestConnectionReadAsyncBytesOuterCancel(byte[] rxMessage)
         {
-            // Arrange          
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+            // Arrange
+            CancellationTokenSource cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             await connection.WriteToRxBuffer(rxMessage, 5000);
 
-            // Act / Asert 
-            await Assert.ThrowsExceptionAsync<ReadCacncelOuterException>(async () =>
-            {
-                await connection.ReadAsync(1, cancellationTokenSource.Token);
-            });
+            // Act
+            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, cancellationTokenSource.Token));
 
+            // Assert
+            result.Should().BeOfType<ReadCancelOuterException>();
         }
 
-        [DataTestMethod]
-        [DataRow(new byte[] { 1, 2, 3, 4 }, DisplayName = "Read 2 byte with 1000 millisecond RX delay")]
+        [Theory]
+        [InlineData(new byte[] {1, 2, 3, 4})]
         public async Task TestConnectionReadAsyncBytesInnerCancel(byte[] rxMessage)
         {
-            // Arrange          
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+            // Arrange
+            CancellationTokenSource cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             IConnectionSettings connectionSettings = new ConnectionSettings();
             connectionSettings.ReceiveTimeoutOuter = 15000;
             connectionSettings.ReceiveTimeoutInner = 1000;
             ConnectionFake connection = new ConnectionFake(connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
-            // Act / Asert 
-            await Assert.ThrowsExceptionAsync<ReadCacncelInnerException>(async () =>
-            {
-                await connection.ReadAsync(5, cancellationTokenSource.Token);
-            });
+            // Act
+            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(5 ,cancellationTokenSource.Token));
 
+            // Assert
+            result.Should().BeOfType<ReadCancelInnerException>();
         }
 
-        //[DataTestMethod]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[DataRow(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
+        //[Theory]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
+        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
         //public async Task TestConnectionReadAsyncEndOfMessage(ChecksumTypes checksum, bool includeChecksum, byte[] rxMessage, byte endofMessage, byte[] expectedResult)
         //{
         //    // Arrange        
@@ -345,10 +325,10 @@ namespace Toolbox.Connection.Test
         //    ConnectionFake connection = new ConnectionFake(connectionSettings);
         //    connection.WriteToRxBuffer(rxMessage, 100);
 
-        //    // Act            
+        //    // Act
         //    var result = await connection.ReadAsync(endofMessage, CancellationToken.None, includeChecksum);
 
-        //    // Asert     
+        //    // Assert     
         //    CollectionAssert.AreEqual(expectedResult, result);
         //}
 
@@ -368,7 +348,7 @@ namespace Toolbox.Connection.Test
                 Host = new HostFake();
             }
 
-            public async override Task<bool> DataAvaliableAsync()
+            public override async Task<bool> DataAvailableAsync()
             {
                 return await Host.DataAvaliable();
             }
