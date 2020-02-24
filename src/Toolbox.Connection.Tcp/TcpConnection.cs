@@ -1,57 +1,88 @@
-﻿namespace Toolbox.Connection.Tcp
+﻿using ReactiveUI.Fody.Helpers;
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Toolbox.Connection.Tcp
 {
-    //public class TcpConnection : Connection
-    //{
-    //    private TcpClient Client = null;
-    //    [Reactive] public string Host { get; private set; }
-    //    [Reactive] public int Port { get; private set; }
+    public class TcpConnection : Connection
+    {
+        private TcpClient Client = null;
+        [Reactive] public string Host { get; private set; }
+        [Reactive] public int Port { get; private set; }
 
-    //    public async override Task<ConnectionState> ConnectAsync()
-    //    {
-    //        State = ConnectionState.Connecting;
+        public async Task<ConnectionState> ConnectAsync(string host, int port)
+        {
+            Host = host;
+            Port = port;
+            return await ConnectAsync();
+        }
 
-    //        if (Client == null)
-    //        {
-    //            Client = new TcpClient();
-    //            Client.ReceiveTimeout = ReceiveTimeoutOuter;
-    //            Client.SendTimeout = SendTimeout;
-    //        }
+        public async override Task<bool> DataAvailableAsync()
+        {
+            return await Task.Run(() => Client.GetStream().DataAvailable);
+        }
 
-    //        IPAddress ipAddress = Dns.GetHostAddresses(Host)[0];
-    //        await Client.ConnectAsync(ipAddress, Port);
+        public override void Dispose()
+        {
+            Client?.Close();
+        }
 
-    //        return State = Client.Connected ? ConnectionState.Conneted : ConnectionState.Disconnected;
-    //    }
+        protected async override Task<bool> ConnectTask()
+        {
+            if (Client == null)
+            {
+                Client = new TcpClient
+                {
+                    ReceiveTimeout = Settings.ReceiveTimeoutOuter,
+                    SendTimeout = Settings.SendTimeout
+                };
+            }
 
-    //    public async Task<ConnectionState> ConnectAsync(string host, int port)
-    //    {
-    //        Host = host;
-    //        Port = port;
-    //        return await ConnectAsync();
-    //    }
+            IPAddress ipAddress = Dns.GetHostAddresses(Host)[0];
+            await Client.ConnectAsync(ipAddress, Port);
 
-    //    public async override Task<ConnectionState> DisconnectAsync()
-    //    {
-    //        State = ConnectionState.Disconnecting;
-    //        await Task.Run(() => Client?.Close());
-    //        Client?.Dispose();
-    //        return State = Client.Connected ? ConnectionState.Conneted : ConnectionState.Disconnected;
-    //    }
+            return Client.Connected;
+        }
 
-    //    public override void Dispose()
-    //    {
-    //        Client?.Close();
-    //        Client?.Dispose();
-    //    }
+        protected async override Task<bool> DisconnectTask()
+        {
+            return await Task.Run(() =>
+            {
+                bool result = true;
+                try
+                {
+                    Client?.Close();
+                }
+                catch (Exception ex)
+                {
+                    result = false;
+                    //TODO:Log.Exception(ex);
+                }
+                return result;
+            });
+        }
 
-    //    public async override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-    //    {
-    //        return await Client.GetStream().ReadAsync(buffer, offset, count, cancellationToken);
-    //    }
+        protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
+        {
+            return await Client.GetStream().ReadAsync(data, 0, data.Length, cancellationToken);
+        }
 
-    //    public async override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-    //    {
-    //        await Client.GetStream().WriteAsync(buffer, offset, count, cancellationToken);
-    //    }
-    //}
+        protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
+        {
+            bool result = true;
+            try
+            {
+                await Client.GetStream().WriteAsync(data, 0, data.Length);
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                //TODO:Log.Exception(ex);
+            }
+            return result;
+        }
+    }
 }

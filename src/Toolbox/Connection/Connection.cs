@@ -124,7 +124,7 @@ namespace Toolbox.Connection
             return result;
         }
 
-        protected abstract Task<int> ReadTask(Memory<byte> data, CancellationToken cancellationToken);
+        protected abstract Task<int> ReadTask(byte[] data, CancellationToken cancellationToken);
         public async Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken)
         {
             bool result = false;
@@ -158,14 +158,11 @@ namespace Toolbox.Connection
                 {
                     // Allocate bytes from the PipeWriter
                     Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReceiveBufferSize);
+                    byte[] buffer = new byte[Settings.ReceiveBufferSize];
                     try
                     {
-                        int bytesRead = await ReadTask(memory, cancellationToken).ConfigureAwait(false);
-                        //if (bytesRead == 0)
-                        //{
-                        //    break;
-                        //}
-                        // Tell the PipeWriter how much was read from the Socket
+                        int bytesRead = await ReadTask(buffer, cancellationToken).ConfigureAwait(false);
+                        buffer.CopyTo(memory);
                         Pipe.Writer.Advance(bytesRead);
                     }
                     catch (Exception ex)
