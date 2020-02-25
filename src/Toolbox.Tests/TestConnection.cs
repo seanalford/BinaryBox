@@ -1,7 +1,8 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Toolbox.Checksum;
 using Xunit;
 
 namespace Toolbox.Connection.Test
@@ -56,7 +57,7 @@ namespace Toolbox.Connection.Test
             await connection.ConnectAsync();
 
             // Assert
-            connection.State.Should().Be(ConnectionState.Connected);
+            connection.State.Should().Be(ConnectionState.Connecting);
         }
 
         [Fact]
@@ -110,7 +111,7 @@ namespace Toolbox.Connection.Test
             ConnectionFake connection = new ConnectionFake(connectionSettings);
 
             // Act
-            await connection.WriteToRxBuffer(new byte[] {1});
+            await connection.WriteToRxBuffer(new byte[] { 1 });
             bool dataAvailable = await connection.DataAvailableAsync();
 
             // Assert
@@ -122,7 +123,7 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             var connection = new ConnectionFake();
-            byte[] txMessage = {1, 2, 3, 4, 5};
+            byte[] txMessage = { 1, 2, 3, 4, 5 };
 
             // Act
             bool result = await connection.WriteAsync(txMessage, CancellationToken.None);
@@ -132,11 +133,11 @@ namespace Toolbox.Connection.Test
         }
 
         [Theory]
-        [InlineData(new byte[] {1, 2, 3, 4, 5}, 1, new byte[] {1})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5}, 2, new byte[] {1, 2})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5}, 3, new byte[] {1, 2, 3})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5}, 4, new byte[] {1, 2, 3, 4})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5}, 5, new byte[] {1, 2, 3, 4, 5})]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 1, new byte[] { 1 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 2, new byte[] { 1, 2 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 3, new byte[] { 1, 2, 3 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 5, new byte[] { 1, 2, 3, 4, 5 })]
         public async Task TestConnectionReadAsyncBytes(byte[] rxMessage, int bytesToRead, byte[] expectedResult)
         {
             // Arrange
@@ -154,9 +155,9 @@ namespace Toolbox.Connection.Test
         }
 
         [Theory]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 1, new byte[] {2})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 2, new byte[] {3, 4})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7}, 3, new byte[] {4, 5, 6})]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 1, new byte[] { 2 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 2, new byte[] { 3, 4 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 3, new byte[] { 4, 5, 6 })]
         public async Task TestConnectionReadAsyncMultiBytes(byte[] rxMessage, int bytesToRead, byte[] expectedResult)
         {
             // Arrange
@@ -175,10 +176,10 @@ namespace Toolbox.Connection.Test
         }
 
         [Theory]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 1, 10, new byte[] {2})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 4, 10, new byte[] {5, 6, 7, 8})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 1, 250, new byte[] {2})]
-        [InlineData(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, 4, 250, new byte[] {5, 6, 7, 8})]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 10, new byte[] { 2 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 4, 10, new byte[] { 5, 6, 7, 8 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 250, new byte[] { 2 })]
+        [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 4, 250, new byte[] { 5, 6, 7, 8 })]
         public async Task TestConnectionReadAsyncMultiBytesWithDelay(byte[] rxMessage, int bytesToRead, int delay,
             byte[] expectedResult)
         {
@@ -236,7 +237,7 @@ namespace Toolbox.Connection.Test
         }
 
         [Theory]
-        [InlineData(new byte[] {1, 2, 3, 4})]
+        [InlineData(new byte[] { 1, 2, 3, 4 })]
         public async Task TestConnectionReadAsyncBytesOuterCancel(byte[] rxMessage)
         {
             // Arrange
@@ -256,7 +257,7 @@ namespace Toolbox.Connection.Test
         }
 
         [Theory]
-        [InlineData(new byte[] {1, 2, 3, 4})]
+        [InlineData(new byte[] { 1, 2, 3, 4 })]
         public async Task TestConnectionReadAsyncBytesInnerCancel(byte[] rxMessage)
         {
             // Arrange
@@ -269,68 +270,68 @@ namespace Toolbox.Connection.Test
             await connection.WriteToRxBuffer(rxMessage);
 
             // Act
-            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(5 ,cancellationTokenSource.Token));
+            var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(5, cancellationTokenSource.Token));
 
             // Assert
             result.Should().BeOfType<ReadCancelInnerException>();
         }
 
-        //[Theory]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.None,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.LRC,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = false)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2, 3 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3, 4 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4, 5 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5, 6 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //[InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, DisplayName = "ReadAsync(Checksum.CRC16,IncludeChecksum = true)")]
-        //public async Task TestConnectionReadAsyncEndOfMessage(ChecksumTypes checksum, bool includeChecksum, byte[] rxMessage, byte endofMessage, byte[] expectedResult)
-        //{
-        //    // Arrange        
-        //    IConnectionSettings connectionSettings = new ConnectionSettings();
-        //    connectionSettings.Checksum = checksum;
-        //    connectionSettings.ReceiveTimeoutOuter = 15000;
-        //    connectionSettings.ReceiveTimeoutInner = 1000;
-        //    ConnectionFake connection = new ConnectionFake(connectionSettings);
-        //    connection.WriteToRxBuffer(rxMessage, 100);
+        [Theory]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.None, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.None, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.CRC16, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        public async Task TestConnectionReadAsyncEndOfText(ChecksumTypes checksum, bool includeChecksum, byte[] rxMessage, byte endOfText, byte[] expectedResult)
+        {
+            // Arrange        
+            IConnectionSettings connectionSettings = new ConnectionSettings();
+            connectionSettings.Checksum = checksum;
+            connectionSettings.ReceiveTimeoutOuter = 15000;
+            connectionSettings.ReceiveTimeoutInner = 1000;
+            ConnectionFake connection = new ConnectionFake(connectionSettings);
+            await connection.WriteToRxBuffer(rxMessage, 250);
 
-        //    // Act
-        //    var result = await connection.ReadAsync(endofMessage, CancellationToken.None, includeChecksum);
+            // Act
+            var result = await connection.ReadAsync(endOfText, CancellationToken.None, includeChecksum);
 
-        //    // Assert     
-        //    CollectionAssert.AreEqual(expectedResult, result);
-        //}
+            // Assert    
+            result.Should().BeEquivalentTo(expectedResult);
+        }
 
         public class ConnectionFake : Connection
         {
