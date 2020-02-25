@@ -137,7 +137,7 @@ namespace Toolbox.Connection
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken).ConfigureAwait(false);
+                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken, includeChecksum).ConfigureAwait(false);
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
             }
@@ -200,7 +200,8 @@ namespace Toolbox.Connection
 #endif
                     if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
-                if (Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText) < 0)
+                int endOfTextIndex = Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText);
+                if (endOfTextIndex < 0)
                 {
                     int bytesToConsume = (int)ReadResult.Buffer.Length;
                     Array.Resize(ref result, result.Length + bytesToConsume);
@@ -214,12 +215,31 @@ namespace Toolbox.Connection
                 }
                 else
                 {
-                    int bytesToConsume = (Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText) + 1) + checksumLength;
+                    int bytesToConsume = endOfTextIndex + 1;
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
-                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
+                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));                     
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
+            }
+
+            if(includeChecksum)
+            {
+                while(true)
+                {
+                    if(checksumLength > ReadResult.Buffer.Length)
+                    {
+                        await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                        Pipe.Reader.AdvanceTo(ReadResult.Buffer.Start);
+                    }
+                    else
+                    {
+                        Array.Resize(ref result, result.Length + checksumLength);
+                        ReadResult.Buffer.Slice(0, checksumLength).ToArray().CopyTo(result, result.Length - checksumLength);
+                        //Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(checksumLength));
+                        break;                        
+                    }
+                }
             }
             return result;
         }
