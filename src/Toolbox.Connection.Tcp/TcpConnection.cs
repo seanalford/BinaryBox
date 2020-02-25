@@ -13,6 +13,18 @@ namespace Toolbox.Connection.Tcp
         [Reactive] public string Host { get; private set; }
         [Reactive] public int Port { get; private set; }
 
+        #region Constructors
+        public TcpConnection() : base(new ConnectionSettings())
+        {
+
+        }
+
+        public TcpConnection(IConnectionSettings settings) : base(settings)
+        {
+
+        }
+        #endregion
+
         public async Task<ConnectionState> ConnectAsync(string host, int port)
         {
             Host = host;
