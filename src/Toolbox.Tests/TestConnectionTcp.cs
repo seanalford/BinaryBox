@@ -7,6 +7,12 @@ namespace Toolbox.Connection.Tcp.Test
         [Fact]
         public void TestConnectionTcpOpen()
         {
+            // Arrange
+            //ConnectionTcp
+
+            // Act
+
+            // Assert
 
         }
     }

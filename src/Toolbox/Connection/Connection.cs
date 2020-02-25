@@ -182,6 +182,9 @@ namespace Toolbox.Connection
             return result;
         }
 
+
+        protected abstract Task<int> ReadTask(byte[] data, CancellationToken cancellationToken);
+
         private async Task<byte[]> ReadEndOfTextAsyncInner(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true)
         {
             byte[] result = new byte[0];
@@ -220,8 +223,6 @@ namespace Toolbox.Connection
             }
             return result;
         }
-
-        protected abstract Task<int> ReadTask(Memory<byte> data, CancellationToken cancellationToken);
 
         /// <summary>
         /// Writes data to the IConnection from the specified byte array as an asynchronous operation.
@@ -262,14 +263,11 @@ namespace Toolbox.Connection
                 {
                     // Allocate bytes from the PipeWriter
                     Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReceiveBufferSize);
+                    byte[] buffer = new byte[Settings.ReceiveBufferSize];
                     try
                     {
-                        int bytesRead = await ReadTask(memory, cancellationToken).ConfigureAwait(false);
-                        //if (bytesRead == 0)
-                        //{
-                        //    break;
-                        //}
-                        // Tell the PipeWriter how much was read from the Socket
+                        int bytesRead = await ReadTask(buffer, cancellationToken).ConfigureAwait(false);
+                        buffer.CopyTo(memory);
                         Pipe.Writer.Advance(bytesRead);
                     }
                     catch (Exception ex)

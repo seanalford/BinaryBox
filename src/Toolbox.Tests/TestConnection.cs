@@ -369,16 +369,9 @@ namespace Toolbox.Connection.Test
                 return await Host.DisconnectAsync(TaskDelay, ExpectedResult);
             }
 
-            protected async override Task<int> ReadTask(Memory<byte> data, CancellationToken cancellationToken)
+            protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
             {
-                int bytesRead = 0;
-                byte[] bytes = new byte[data.Length];
-
-                bytesRead = await Host.ReadAsync(bytes, cancellationToken);
-
-                bytes.CopyTo(data);
-
-                return bytesRead;
+                return await Host.ReadAsync(data, cancellationToken);
             }
 
             protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
