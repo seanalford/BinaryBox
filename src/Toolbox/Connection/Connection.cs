@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
+using Toolbox.Checksum;
 
 namespace Toolbox.Connection
 {
@@ -28,6 +29,10 @@ namespace Toolbox.Connection
         }
         #endregion
 
+        /// <summary>
+        /// Connects the IConnection to a remote end point.
+        /// </summary>
+        /// <returns>Returns the current connection state</returns>
         public async Task<ConnectionState> ConnectAsync()
         {
             State = ConnectionState.Connecting;
@@ -45,7 +50,17 @@ namespace Toolbox.Connection
         }
 
         protected abstract Task<bool> ConnectTask();
+
+        /// <summary>
+        /// Indicates whether data is available on the IConnection to be read.
+        /// </summary>
+        /// <returns>true if data is available on the IConnection to be read; otherwise, false.</returns>
         public abstract Task<bool> DataAvailableAsync();
+
+        /// <summary>
+        /// Disconnects the IConnection from a remote end point.
+        /// </summary>
+        /// <returns>Returns the current connection state</returns>
         public async Task<ConnectionState> DisconnectAsync()
         {
             State = ConnectionState.Disconnecting;
@@ -53,7 +68,6 @@ namespace Toolbox.Connection
             {
                 bool state = await DisconnectTask().ConfigureAwait(false);
                 State = state == true ? ConnectionState.Disconnected : ConnectionState.Connected;
-
             }
             catch (Exception ex)
             {
@@ -63,8 +77,15 @@ namespace Toolbox.Connection
             return State;
         }
         protected abstract Task<bool> DisconnectTask();
+
         public abstract void Dispose();
 
+        /// <summary>
+        /// Reads data from the IConnection as an asynchronous operation.
+        /// </summary>
+        /// <param name="bytesToRead">The number of bytes to read.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>        
+        /// <returns>A task that represents the asynchronous read operation. The value of its Result property contains a byte[] of data that was read.</returns>
         public async Task<byte[]> ReadAsync(int bytesToRead, CancellationToken cancellationToken)
         {
             byte[] result = new byte[0];
@@ -76,7 +97,10 @@ namespace Toolbox.Connection
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { throw new ReadTimeoutOuterException(); Pipe.Reader.Complete(); }
+#if (DEBUG)
+                if (!System.Diagnostics.Debugger.IsAttached)
+#endif
+                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -85,6 +109,38 @@ namespace Toolbox.Connection
                 if (result?.Length == bytesToRead) break;
             }
 
+            return result;
+        }
+
+        /// <summary>
+        /// Reads data from the IConnection as an asynchronous operation.
+        /// </summary>
+        /// <param name="endOfText">Defines the last byte to read.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="includeChecksum">Causes additional checksum bytes to be returned.</param>
+        /// <returns>A task that represents the asynchronous read operation. The value of its Result property contains a byte[] of data that was read.</returns>
+        public async Task<byte[]> ReadAsync(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true)
+        {
+            byte[] result = new byte[0];
+
+            PipeInit(cancellationToken);
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (true)
+            {
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
+#if (DEBUG)
+                if (!System.Diagnostics.Debugger.IsAttached)
+#endif
+                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
+
+                if (Pipe.Reader.TryRead(out ReadResult))
+                {
+                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken).ConfigureAwait(false);
+                }
+                if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
+            }
             return result;
         }
 
@@ -97,7 +153,10 @@ namespace Toolbox.Connection
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+#if(DEBUG)
+                if (!System.Diagnostics.Debugger.IsAttached)
+#endif
+                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
                 {
@@ -105,7 +164,7 @@ namespace Toolbox.Connection
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
                     Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
-                    Pipe.Reader.TryRead(out ReadResult);
+                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
                     if (ReadResult.Buffer.Length > 0)
                     {
                         stopwatch.Restart();
@@ -118,13 +177,59 @@ namespace Toolbox.Connection
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
                     Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
                 }
-
                 if (result?.Length == bytesToRead) break;
             }
             return result;
         }
 
+
         protected abstract Task<int> ReadTask(byte[] data, CancellationToken cancellationToken);
+
+        private async Task<byte[]> ReadEndOfTextAsyncInner(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true)
+        {
+            byte[] result = new byte[0];
+            int checksumLength = includeChecksum == true ? Settings.Checksum.Length() : 0;
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (true)
+            {
+                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
+#if (DEBUG)
+                if (!System.Diagnostics.Debugger.IsAttached)
+#endif
+                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+
+                if (Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText) < 0)
+                {
+                    int bytesToConsume = (int)ReadResult.Buffer.Length;
+                    Array.Resize(ref result, result.Length + bytesToConsume);
+                    ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
+                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
+                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                    if (ReadResult.Buffer.Length > 0)
+                    {
+                        stopwatch.Restart();
+                    }
+                }
+                else
+                {
+                    int bytesToConsume = (Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText) + 1) + checksumLength;
+                    Array.Resize(ref result, result.Length + bytesToConsume);
+                    ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
+                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
+                }
+                if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Writes data to the IConnection from the specified byte array as an asynchronous operation.
+        /// </summary>
+        /// <param name="data">A byte array that contains the data to be written</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
         public async Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken)
         {
             bool result = false;
@@ -184,5 +289,6 @@ namespace Toolbox.Connection
             // Tell the PipeReader that there's no more data coming
             Pipe.Writer.Complete();
         }
+
     }
 }
