@@ -23,6 +23,24 @@ namespace Toolbox.Connection.Tcp.Tests
 
         [Theory]
         [InlineData("127.0.0.1", 777, ConnectionState.Connected)]
+        public async void TestDefaultConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
+        {
+            // Arange            
+            StartServer(host, port);
+            using TcpConnection connection = new TcpConnection() { Host = host, Port = port };
+
+            // Act
+            ConnectionState state = await connection.ConnectAsync();
+            Server.Stop();
+
+            // Assert
+            state.Should().Be(expectedResult);
+            connection.State.Should().Be(expectedResult);
+
+        }
+
+        [Theory]
+        [InlineData("127.0.0.1", 777, ConnectionState.Connected)]
         public async void TestConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange            
