@@ -1,5 +1,4 @@
-﻿using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -7,18 +6,11 @@ using System.Threading.Tasks;
 
 namespace Toolbox.Connection.Tcp
 {
-    public interface ITcpConnection : IConnection
-    {
-        string Host { get; set; }
-        int Port { get; set; }
-        Task<ConnectionState> ConnectAsync(string host, int port);
-    }
-
     public class TcpConnection : Connection, ITcpConnection
     {
         private TcpClient Client = null;
-        [Reactive] public string Host { get; set; }
-        [Reactive] public int Port { get; set; }
+        public string Host { get; set; }
+        public int Port { get; set; }
 
         #region Constructors
         public TcpConnection() : base(new ConnectionSettings())

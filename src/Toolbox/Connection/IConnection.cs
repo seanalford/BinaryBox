@@ -43,7 +43,7 @@ namespace Toolbox.Connection
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <param name="includeChecksum">Causes additional checksum bytes to be returned.</param>
         /// <returns>A task that represents the asynchronous read operation. The value of its Result property contains a byte[] of data that was read.</returns>
-        Task<byte[]> ReadAsync(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true);
+        Task<byte[]> ReadAsync(byte endOfText, CancellationToken cancellationToken, int checksumLength = 0);
 
         /// <summary>
         /// Writes data to the IConnection from the specified byte array as an asynchronous operation.

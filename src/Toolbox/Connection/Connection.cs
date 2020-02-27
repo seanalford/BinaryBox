@@ -1,21 +1,20 @@
-﻿using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Checksum;
 
 namespace Toolbox.Connection
 {
-    public abstract class Connection : IConnection
+    public abstract class Connection : IConnection, INotifyPropertyChanged
     {
         private Pipe Pipe = null;
+        public event PropertyChangedEventHandler PropertyChanged;
         private ReadResult ReadResult;
-
-        [Reactive] public IConnectionSettings Settings { get; set; }
-        [Reactive] public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
+        public IConnectionSettings Settings { get; set; }
+        public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
         #region Constructors
         public Connection() : this(new ConnectionSettings())
@@ -97,10 +96,7 @@ namespace Toolbox.Connection
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
-#if (DEBUG)
-                if (!System.Diagnostics.Debugger.IsAttached)
-#endif
-                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -119,7 +115,7 @@ namespace Toolbox.Connection
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <param name="includeChecksum">Causes additional checksum bytes to be returned.</param>
         /// <returns>A task that represents the asynchronous read operation. The value of its Result property contains a byte[] of data that was read.</returns>
-        public async Task<byte[]> ReadAsync(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true)
+        public async Task<byte[]> ReadAsync(byte endOfText, CancellationToken cancellationToken, int checksumLength = 0)
         {
             byte[] result = new byte[0];
 
@@ -130,14 +126,11 @@ namespace Toolbox.Connection
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
-#if (DEBUG)
-                if (!System.Diagnostics.Debugger.IsAttached)
-#endif
-                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken, includeChecksum).ConfigureAwait(false);
+                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken, checksumLength).ConfigureAwait(false);
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
             }
@@ -153,10 +146,7 @@ namespace Toolbox.Connection
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
-#if(DEBUG)
-                if (!System.Diagnostics.Debugger.IsAttached)
-#endif
-                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
                 {
@@ -182,23 +172,16 @@ namespace Toolbox.Connection
             return result;
         }
 
-
-        protected abstract Task<int> ReadTask(byte[] data, CancellationToken cancellationToken);
-
-        private async Task<byte[]> ReadEndOfTextAsyncInner(byte endOfText, CancellationToken cancellationToken, bool includeChecksum = true)
+        private async Task<byte[]> ReadEndOfTextAsyncInner(byte endOfText, CancellationToken cancellationToken, int checksumLength = 0)
         {
             byte[] result = new byte[0];
-            int checksumLength = includeChecksum == true ? Settings.Checksum.Length() : 0;
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
-#if (DEBUG)
-                if (!System.Diagnostics.Debugger.IsAttached)
-#endif
-                    if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+                //if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 int endOfTextIndex = Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText);
                 if (endOfTextIndex < 0)
@@ -218,16 +201,17 @@ namespace Toolbox.Connection
                     int bytesToConsume = endOfTextIndex + 1;
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
-                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));                     
+                    Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
+                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
             }
 
-            if(includeChecksum)
+            if (checksumLength > 0)
             {
-                while(true)
+                while (true)
                 {
-                    if(checksumLength > ReadResult.Buffer.Length)
+                    if (checksumLength > ReadResult.Buffer.Length)
                     {
                         await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
                         Pipe.Reader.AdvanceTo(ReadResult.Buffer.Start);
@@ -237,12 +221,14 @@ namespace Toolbox.Connection
                         Array.Resize(ref result, result.Length + checksumLength);
                         ReadResult.Buffer.Slice(0, checksumLength).ToArray().CopyTo(result, result.Length - checksumLength);
                         //Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(checksumLength));
-                        break;                        
+                        break;
                     }
                 }
             }
             return result;
         }
+
+        protected abstract Task<int> ReadTask(byte[] data, CancellationToken cancellationToken);
 
         /// <summary>
         /// Writes data to the IConnection from the specified byte array as an asynchronous operation.
@@ -252,10 +238,10 @@ namespace Toolbox.Connection
         /// <returns>A task that represents the asynchronous write operation.</returns>
         public async Task<bool> WriteAsync(byte[] data, CancellationToken cancellationToken)
         {
-            bool result = false;
+            bool result;
             try
             {
-                await WriteTask(data, cancellationToken).ConfigureAwait(false);
+                result = await WriteTask(data, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
