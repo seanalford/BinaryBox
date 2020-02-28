@@ -2,23 +2,16 @@
 
 namespace Toolbox.Protocol
 {
-    public interface IMethodResultStatus<TMethodStatus>
-        where TMethodStatus : struct
+    public class MethodResultStatus<TMessageStatus> : IMessageResultStatus<TMessageStatus>
+        where TMessageStatus : struct
     {
-        TMethodStatus Status { get; }
-        string Text { get; }
-    }
-
-    public class MethodResultStatus<TMethodStatus> : IMethodResultStatus<TMethodStatus>
-        where TMethodStatus : struct
-    {
-        public TMethodStatus Status { get; protected set; }
+        public TMessageStatus Status { get; protected set; }
         public string Text { get; protected set; }
-        public MethodResultStatus(TMethodStatus status, string text = "")
+        public MethodResultStatus(TMessageStatus status, string text = "")
         {
-            if (!typeof(TMethodStatus).IsEnum)
+            if (!typeof(TMessageStatus).IsEnum)
             {
-                throw new ArgumentException("TMethodStatus must be an enumerated type");
+                throw new ArgumentException("TMessageStatus must be an enumerated type");
             }
             Status = status;
             Text = text;
