@@ -5,23 +5,12 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public interface IClient<TMethod, TMethodResult, TMethodResultStatus, TMethodStatus, TMethodResultData>
-        where TMethod : IMethod
-        where TMethodResult : IMethodResult<TMethodResultStatus, TMethodStatus, TMethodResultData>
-        where TMethodResultStatus : IMethodResultStatus<TMethodStatus>
-        where TMethodStatus : struct
-        where TMethodResultData : IDictionary<string, object>
-    {
-        IConnection Connection { get; }
-        Task<TMethodResult> SendAsync(TMethod method, CancellationToken cancellationToken);
-    }
-
-    public abstract class Client<TMethod, TMethodResult, TMethodResultStatus, TMethodStatus, TMethodResultData> : IClient<TMethod, TMethodResult, TMethodResultStatus, TMethodStatus, TMethodResultData>
-        where TMethod : IMethod
-        where TMethodResult : IMethodResult<TMethodResultStatus, TMethodStatus, TMethodResultData>
-        where TMethodResultStatus : IMethodResultStatus<TMethodStatus>
-        where TMethodStatus : struct
-        where TMethodResultData : IDictionary<string, object>
+    public abstract class Client<TMessage, TMessageResult, TMessageResultStatus, TMessageStatus, TMessageResultData> : IClient<TMessage, TMessageResult, TMessageResultStatus, TMessageStatus, TMessageResultData>
+        where TMessage : IMessage
+        where TMessageResult : IMessageResult<TMessageResultStatus, TMessageStatus, TMessageResultData>
+        where TMessageResultStatus : IMessageResultStatus<TMessageStatus>
+        where TMessageStatus : struct
+        where TMessageResultData : IDictionary<string, object>
     {
         public IConnection Connection { get; protected set; }
 
@@ -29,6 +18,9 @@ namespace Toolbox.Protocol
         {
             Connection = connection;
         }
-        public abstract Task<TMethodResult> SendAsync(TMethod method, CancellationToken cancellationToken);
+        public abstract Task<TMessageResult> SendAsync(TMessage message, CancellationToken cancellationToken);
+
+        public abstract void Dispose();
+
     }
 }
