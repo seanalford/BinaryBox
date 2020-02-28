@@ -2,12 +2,12 @@
 
 namespace Toolbox.Protocol
 {
-    public class MethodResultStatus<TMessageStatus> : IMessageResultStatus<TMessageStatus>
+    public class MessageResultStatus<TMessageStatus> : IMessageResultStatus<TMessageStatus>
         where TMessageStatus : struct
     {
         public TMessageStatus Status { get; protected set; }
         public string Text { get; protected set; }
-        public MethodResultStatus(TMessageStatus status, string text = "")
+        public MessageResultStatus(TMessageStatus status, string text = "")
         {
             if (!typeof(TMessageStatus).IsEnum)
             {
