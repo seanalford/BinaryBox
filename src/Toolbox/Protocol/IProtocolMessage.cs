@@ -3,7 +3,8 @@
 namespace Toolbox.Protocol
 {
 
-    public interface IProtocolMessage : IDisposable
+    public interface IProtocolMessage<TMessageStatus> : IDisposable
+        where TMessageStatus : struct
     {
         byte[] Abort { get; }
         byte[] Ack { get; }
@@ -14,7 +15,8 @@ namespace Toolbox.Protocol
         byte[] Nak { get; }
         int RxBytesToRead { get; }
         byte RxEndOfMessageToken { get; }
-        IProtocolMessageStatus Status { get; }
+        IProtocolSettings Settings { get; set; }
+        TMessageStatus Status { get; }
         int TxBytesToRead { get; }
         byte TxEndOfMessageToken { get; }
         bool ValidateTx { get; }

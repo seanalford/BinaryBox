@@ -6,8 +6,9 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public abstract class ProtocolClient<TMessage> : IProtocolClient<TMessage>
-        where TMessage : IProtocolMessage
+    public abstract class ProtocolClient<TMessage, TMessageStatus> : IProtocolClient<TMessage, TMessageStatus>
+        where TMessage : IProtocolMessage<TMessageStatus>
+        where TMessageStatus : struct
     {
         public IConnection Connection { get; protected set; }
         public IProtocolSettings Settings { get; protected set; }
@@ -24,9 +25,9 @@ namespace Toolbox.Protocol
         /// <param name="message">The TMessage to send to the host.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting messageg status</returns>
-        public async Task<IProtocolMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken)
+        public async Task<TMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken)
         {
-            IProtocolMessageStatus result = default;
+            TMessageStatus result = default;
             if (await Tx(message, cancellationToken))
             {
                 result = await Rx(message, cancellationToken);
@@ -62,7 +63,7 @@ namespace Toolbox.Protocol
                     }
                     else { result = true; break; }
                 }
-                if (retires++ == Settings.SendRetries) { throw new RetryLimitExceededException(); }
+                if (retires++ == Settings.SendRetries) { throw new SendRetryLimitExceededException(); }
             }
             return result;
         }
@@ -73,9 +74,9 @@ namespace Toolbox.Protocol
         /// <param name="message">The IHexAsciiMessage to be received.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting HexAsciiMessageResult</returns>
-        private async Task<IProtocolMessageStatus> Rx(TMessage message, CancellationToken cancellationToken)
+        private async Task<TMessageStatus> Rx(TMessage message, CancellationToken cancellationToken)
         {
-            IProtocolMessageStatus result = default;
+            TMessageStatus result = default;
             int retires = 0;
 
             while (true)
@@ -97,7 +98,7 @@ namespace Toolbox.Protocol
                     {
                         // Send Abort signal to the host?
                         await SendAbort(message, cancellationToken);
-                        throw new RetryLimitExceededException();
+                        throw new ReceiveRetryLimitExceededException();
                     }
                     else { await SendNak(message, cancellationToken); }
                 }

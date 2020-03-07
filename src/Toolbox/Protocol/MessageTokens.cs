@@ -3,10 +3,10 @@
     // TODO: Convert to ENUM
     public class MessageTokens
     {
-        public const byte STX = 2;
-        public const byte ETX = 3;
-        public const byte ACK = 6;
-        public const byte NAK = 21;
-        public const byte ESC = 27;
+        public const char STX = '\x2';
+        public const char ETX = '\x3';
+        public const char ACK = '\x6';
+        public const char NAK = '\x21';
+        public const char ESC = '\x27';
     }
 }
