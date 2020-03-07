@@ -4,9 +4,9 @@ namespace Toolbox.Protocol
 {
     public interface IProtocolSettings
     {
-        ChecksumTypes Checksum { get; }
-        int ConnectRetries { get; }
-        int ReceiveRetries { get; }
-        int SendRetries { get; }
+        ChecksumTypes Checksum { get; set; }
+        int ConnectRetries { get; set; }
+        int ReceiveRetries { get; set; }
+        int SendRetries { get; set; }
     }
 }

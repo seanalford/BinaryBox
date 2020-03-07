@@ -5,11 +5,12 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public interface IProtocolClient<TMessage> : IDisposable
-        where TMessage : IProtocolMessage
+    public interface IProtocolClient<TMessage, TMessageStatus> : IDisposable
+        where TMessage : IProtocolMessage<TMessageStatus>
+        where TMessageStatus : struct
     {
         IConnection Connection { get; }
-        Task<IProtocolMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken);
+        Task<TMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken);
 
     }
 }
