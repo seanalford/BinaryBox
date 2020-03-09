@@ -6,8 +6,9 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public abstract class ProtocolClient<TMessage, TMessageStatus> : IProtocolClient<TMessage, TMessageStatus>
-        where TMessage : IProtocolMessage<TMessageStatus>
+    public abstract class ProtocolClient<TProtocolSettings, TMessage, TMessageStatus> : IProtocolClient<TProtocolSettings, TMessage, TMessageStatus>
+        where TProtocolSettings : IProtocolSettings
+        where TMessage : IProtocolMessage<TProtocolSettings, TMessageStatus>
         where TMessageStatus : struct
     {
         public IConnection Connection { get; protected set; }

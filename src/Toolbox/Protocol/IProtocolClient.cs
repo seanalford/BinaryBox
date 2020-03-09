@@ -5,8 +5,9 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public interface IProtocolClient<TMessage, TMessageStatus> : IDisposable
-        where TMessage : IProtocolMessage<TMessageStatus>
+    public interface IProtocolClient<TProtocolSettings, TMessage, TMessageStatus> : IDisposable
+        where TProtocolSettings : IProtocolSettings
+        where TMessage : IProtocolMessage<TProtocolSettings, TMessageStatus>
         where TMessageStatus : struct
     {
         IConnection Connection { get; }

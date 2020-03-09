@@ -11,7 +11,7 @@ namespace Toolbox.Protocol.Test
         public void TestDefaultProtocolMessage()
         {
             // Arrange / Act
-            IProtocolMessage<FakeProtcolMessageStatus> protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings());
+            IProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus> protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings());
 
             //// Assert
             protocolMessage.Abort.Should().BeEquivalentTo(BitConverter.GetBytes(MessageTokens.ESC));
