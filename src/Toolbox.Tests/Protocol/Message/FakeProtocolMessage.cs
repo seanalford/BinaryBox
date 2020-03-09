@@ -6,7 +6,7 @@ using Toolbox.IEEE;
 
 namespace Toolbox.Protocol.Test
 {
-    public abstract class FakeProtocolMessage : ProtocolMessage<FakeProtcolMessageStatus>, IFakeProtocolMessage<FakeProtcolMessageStatus>
+    public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus>, IFakeProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus>
     {
         protected FakeProtcolMessageTypes _Type;
         protected int _Item;

@@ -1,6 +1,7 @@
 ﻿namespace Toolbox.Protocol.Test
 {
-    public interface IFakeProtocolMessage<TMessageStatus> : IProtocolMessage<TMessageStatus>
+    public interface IFakeProtocolMessage<TProtocolSettings, TMessageStatus> : IProtocolMessage<TProtocolSettings, TMessageStatus>
+        where TProtocolSettings : IProtocolSettings
         where TMessageStatus : struct
     {
 
