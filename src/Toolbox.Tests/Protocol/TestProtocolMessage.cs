@@ -32,9 +32,10 @@ namespace Toolbox.Protocol.Test
         {
             // Arrange
             var protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings() { Checksum = checksum });
+            bool result = protocolMessage.Decode(rxMessage);
 
             // Act
-            bool result = protocolMessage.Decode(rxMessage);
+            protocolMessage.DecodeData();
 
             // Arrange 
             result.Should().BeTrue();

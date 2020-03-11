@@ -28,6 +28,9 @@ namespace Toolbox.Protocol
         /// <returns>Returns the resulting messageg status</returns>
         public async Task<TMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken)
         {
+
+            message.ClearData();
+
             TMessageStatus result = default;
             if (await Tx(message, cancellationToken))
             {
@@ -82,13 +85,14 @@ namespace Toolbox.Protocol
 
             while (true)
             {
-                byte[] data;
+                byte[] data = await RxRead(message, cancellationToken);
 
-                data = await RxRead(message, cancellationToken);
                 if (message.Decode(data))
                 {
                     // Send ACK to host to signal message received.
                     await SendAck(message, cancellationToken);
+
+                    message.DecodeData();
 
                     if (message.Complete) { result = message.Status; break; }
 

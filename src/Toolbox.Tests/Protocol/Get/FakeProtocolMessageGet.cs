@@ -2,6 +2,10 @@
 {
     public class FakeProtocolMessageGet : FakeProtocolMessage, IFakeProtocolMessageGetItem
     {
+        public override void ClearData()
+        {
+            Data?.Clear();
+        }
         public new FakeProtocolMessageGetData Data { get; private set; }
 
         public FakeProtocolMessageGet(IFakeProtocolSettings settings) : base(settings)
@@ -9,11 +13,10 @@
             Data = new FakeProtocolMessageGetData();
         }
 
-        public override FakeProtcolMessageStatus DecodeData()
+        public override void DecodeData()
         {
             Data.Item = _Item;
             Data.Value = _Value;
-            return FakeProtcolMessageStatus.SUCCESS;
         }
 
         public IFakeProtocolMessageGetItem Item(int item)
