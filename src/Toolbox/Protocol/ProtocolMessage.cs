@@ -12,11 +12,15 @@
 
         public byte[] Ack { get; protected set; }
 
+        public abstract void ClearData();
+
         public bool Complete { get; protected set; }
 
         public IProtocolMessageData Data { get; protected set; }
 
         public abstract bool Decode(byte[] data);
+
+        public abstract void DecodeData();
 
         public abstract void Dispose();
 

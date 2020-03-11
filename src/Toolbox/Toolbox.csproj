@@ -11,8 +11,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="3.2.6" />
-    <PackageReference Include="ReactiveUI" Version="11.2.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="11.2.1" />
+    <PackageReference Include="ReactiveUI" Version="11.2.3" />
+    <PackageReference Include="ReactiveUI.Fody" Version="11.2.3" />
     <PackageReference Include="System.IO.Pipelines" Version="4.7.0" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
   </ItemGroup>

@@ -11,7 +11,6 @@ namespace Toolbox.Protocol.Test
         protected FakeProtcolMessageTypes _Type;
         protected int _Item;
         protected float _Value;
-        //public FakeProtcolMessageStatus Status { get; protected set; }
 
         public FakeProtocolMessage(IFakeProtocolSettings settings) : base(settings)
         {
@@ -31,16 +30,9 @@ namespace Toolbox.Protocol.Test
         {
             Status = FakeProtcolMessageStatus.FAIL;
 
-            try
+            if (DecodeMessage(data))
             {
-                if (DecodeMessage(data))
-                {
-                    Status = DecodeData();
-                }
-            }
-            catch (Exception ex)
-            {
-                //FakeLog.Exception(ex);                
+                Status = FakeProtcolMessageStatus.SUCCESS;
             }
 
             return Status == FakeProtcolMessageStatus.SUCCESS;
@@ -48,8 +40,12 @@ namespace Toolbox.Protocol.Test
 
         public virtual bool DecodeMessage(byte[] data)
         {
-            if (data[0] != MessageTokens.STX) throw new Exception("Missing STX");
-            if (data[data.Length - Settings.Checksum.Length() - 1] != MessageTokens.ETX) throw new Exception("Missing ETX");
+            if ((data.Length == 0) ||
+                        (data[0] != MessageTokens.STX) ||
+                        (data[data.Length - Settings.Checksum.Length() - 1] != MessageTokens.ETX))
+            {
+                return false;
+            }
 
             int messageLength = data.Length - 2 - Settings.Checksum.Length();
             byte[] message = new byte[messageLength];
@@ -61,7 +57,7 @@ namespace Toolbox.Protocol.Test
 
             if (Settings.Checksum != ChecksumTypes.None)
             {
-                if (!message.Checksum(Settings.Checksum).SequenceEqual(checksum)) throw new Exception("Checksum Exception");
+                if (!message.Checksum(Settings.Checksum).SequenceEqual(checksum)) return false;
             }
 
             _Type = (FakeProtcolMessageTypes)Convert.ToByte(Encoding.ASCII.GetString(message, 0, 2), 16);
@@ -69,9 +65,8 @@ namespace Toolbox.Protocol.Test
             _Value = Encoding.ASCII.GetString(message, 6, 8).ToFloat();
 
             return true;
-        }
 
-        public virtual FakeProtcolMessageStatus DecodeData() => FakeProtcolMessageStatus.SUCCESS;
+        }
 
         public override void Dispose() { }
 

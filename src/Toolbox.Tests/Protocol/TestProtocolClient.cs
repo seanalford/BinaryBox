@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using NSubstitute;
-using System;
 using System.Threading;
 using Toolbox.Checksum;
 using Toolbox.Connection;
@@ -66,7 +65,7 @@ namespace Toolbox.Protocol.Test
         [InlineData(ChecksumTypes.None, 3)]
         [InlineData(ChecksumTypes.None, 4)]
         [InlineData(ChecksumTypes.None, 5)]
-        public async void TestFakeClientSendRxRetires(ChecksumTypes checksum, int receiveRetries)
+        public async void TestFakeClientSendRxRetiresNoData(ChecksumTypes checksum, int receiveRetries)
         {
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
@@ -76,7 +75,33 @@ namespace Toolbox.Protocol.Test
             var message = FakeProtocol.Get(settings).Item(1);
             connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(true);
             connection.ReadAsync(1, cancellationToken).Returns(message.Ack);
-            connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(BitConverter.GetBytes(MessageTokens.NAK));
+            connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(new byte[0]);
+
+            // Act
+            var result = await Record.ExceptionAsync(async () => await client.SendAsync(message, cancellationToken));
+
+            // Assert
+            result.Should().BeOfType<ReceiveRetryLimitExceededException>();
+        }
+
+        // Test Rx Retries
+        [Theory]
+        [InlineData(ChecksumTypes.None, 1)]
+        [InlineData(ChecksumTypes.None, 2)]
+        [InlineData(ChecksumTypes.None, 3)]
+        [InlineData(ChecksumTypes.None, 4)]
+        [InlineData(ChecksumTypes.None, 5)]
+        public async void TestFakeClientSendRxRetiresWithData(ChecksumTypes checksum, int receiveRetries)
+        {
+            // Arrange                 
+            CancellationToken cancellationToken = new CancellationToken();
+            IConnection connection = Substitute.For<IConnection>();
+            IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, ReceiveRetries = receiveRetries };
+            var client = new FakeClient(connection, settings);
+            var message = FakeProtocol.Get(settings).Item(1);
+            connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(true);
+            connection.ReadAsync(1, cancellationToken).Returns(message.Ack);
+            connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(new byte[5] { 3, 2, 3, 4, 5 });
 
             // Act
             var result = await Record.ExceptionAsync(async () => await client.SendAsync(message, cancellationToken));

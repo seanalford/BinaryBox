@@ -8,9 +8,11 @@ namespace Toolbox.Protocol
     {
         byte[] Abort { get; }
         byte[] Ack { get; }
+        void ClearData();
         bool Complete { get; }
         IProtocolMessageData Data { get; }
         bool Decode(byte[] data);
+        void DecodeData();
         byte[] Encode();
         byte[] Nak { get; }
         int RxBytesToRead { get; }

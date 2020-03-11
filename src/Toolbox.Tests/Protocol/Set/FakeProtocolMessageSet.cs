@@ -2,6 +2,15 @@
 {
     public class FakeProtocolMessageSet : FakeProtocolMessage, IFakeProtocolMessageSetItem
     {
+        public override void ClearData()
+        {
+            Data?.Clear();
+        }
+
+        public override void DecodeData()
+        {
+
+        }
 
         public FakeProtocolMessageSet(IFakeProtocolSettings protocolSettings) : base(protocolSettings)
         {
