@@ -1,10 +1,12 @@
-﻿namespace Toolbox.Protocol
+﻿using Microsoft.Extensions.Logging;
+
+namespace Toolbox.Protocol
 {
-    public abstract class ProtocolMessage<TProtocolSettings, TMessageStatus> : IProtocolMessage<TProtocolSettings, TMessageStatus>
+    public abstract class ProtocolMessage<TProtocolSettings, TMessageStatus> : Protocol, IProtocolMessage<TProtocolSettings, TMessageStatus>
         where TProtocolSettings : IProtocolSettings
         where TMessageStatus : struct
     {
-        public ProtocolMessage(TProtocolSettings settings)
+        public ProtocolMessage(ILogger logger, TProtocolSettings settings) : base(logger)
         {
             Settings = settings;
         }
@@ -21,8 +23,6 @@
         public abstract bool Decode(byte[] data);
 
         public abstract void DecodeData();
-
-        public abstract void Dispose();
 
         public abstract byte[] Encode();
 

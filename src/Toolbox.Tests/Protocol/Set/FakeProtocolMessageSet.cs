@@ -1,4 +1,6 @@
-﻿namespace Toolbox.Protocol.Test
+﻿using Microsoft.Extensions.Logging;
+
+namespace Toolbox.Protocol.Test
 {
     public class FakeProtocolMessageSet : FakeProtocolMessage, IFakeProtocolMessageSetItem
     {
@@ -12,7 +14,7 @@
 
         }
 
-        public FakeProtocolMessageSet(IFakeProtocolSettings protocolSettings) : base(protocolSettings)
+        public FakeProtocolMessageSet(ILogger logger, IFakeProtocolSettings protocolSettings) : base(logger, protocolSettings)
         {
             // Disable for testing this use case;
             ValidateTx = false;

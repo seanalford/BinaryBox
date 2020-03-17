@@ -1,4 +1,6 @@
-﻿namespace Toolbox.Protocol.Test
+﻿using Microsoft.Extensions.Logging;
+
+namespace Toolbox.Protocol.Test
 {
     public class FakeProtocolMessageGet : FakeProtocolMessage, IFakeProtocolMessageGetItem
     {
@@ -8,7 +10,7 @@
         }
         public new FakeProtocolMessageGetData Data { get; private set; }
 
-        public FakeProtocolMessageGet(IFakeProtocolSettings settings) : base(settings)
+        public FakeProtocolMessageGet(ILogger logger, IFakeProtocolSettings settings) : base(logger, settings)
         {
             Data = new FakeProtocolMessageGetData();
         }
