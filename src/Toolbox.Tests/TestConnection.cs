@@ -107,8 +107,8 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
 
             // Act
@@ -143,8 +143,8 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
@@ -163,8 +163,8 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
@@ -186,8 +186,8 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             byte[] result = new byte[0];
             await connection.WriteToRxBuffer(rxMessage, delay);
@@ -207,14 +207,14 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = timeout;
+            connectionSettings.SecondaryReadTimeout = timeout;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
 
             // Act
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, CancellationToken.None));
 
             // Assert
-            result.Should().BeOfType<ReadTimeoutOuterException>();
+            result.Should().BeOfType<PrimaryReadTimeoutException>();
         }
 
         [Theory]
@@ -226,7 +226,7 @@ namespace Toolbox.Connection.Test
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutInner = timeout;
+            connectionSettings.PrimaryReadTimeout = timeout;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage, delay);
 
@@ -234,7 +234,7 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(bytesToRead, CancellationToken.None));
 
             // Assert
-            result.Should().BeOfType<ReadTimeoutInnerException>();
+            result.Should().BeOfType<SecondartReadTimeoutException>();
         }
 
         [Theory]
@@ -245,8 +245,8 @@ namespace Toolbox.Connection.Test
             CancellationTokenSource cancellationTokenSource =
                 new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage, 5000);
 
@@ -254,7 +254,7 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, cancellationTokenSource.Token));
 
             // Assert
-            result.Should().BeOfType<ReadCancelOuterException>();
+            result.Should().BeOfType<CancelPrimaryReadException>();
         }
 
         [Theory]
@@ -265,8 +265,8 @@ namespace Toolbox.Connection.Test
             CancellationTokenSource cancellationTokenSource =
                 new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage);
 
@@ -274,7 +274,7 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(5, cancellationTokenSource.Token));
 
             // Assert
-            result.Should().BeOfType<ReadCancelInnerException>();
+            result.Should().BeOfType<CancelSecondaryReadException>();
         }
 
         [Theory(Timeout = 5000)]
@@ -296,8 +296,8 @@ namespace Toolbox.Connection.Test
             // Arrange        
             int checksumLength = (includeChecksum == true) ? checksum.Length() : 0;
             IConnectionSettings connectionSettings = new ConnectionSettings();
-            connectionSettings.ReceiveTimeoutOuter = 15000;
-            connectionSettings.ReceiveTimeoutInner = 1000;
+            connectionSettings.SecondaryReadTimeout = 15000;
+            connectionSettings.PrimaryReadTimeout = 1000;
             using ConnectionFake connection = new ConnectionFake(LoggerFactory.Build(), connectionSettings);
             await connection.WriteToRxBuffer(rxMessage, 250);
 

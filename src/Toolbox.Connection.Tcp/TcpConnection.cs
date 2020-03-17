@@ -43,8 +43,8 @@ namespace Toolbox.Connection.Tcp
             {
                 Client = new TcpClient
                 {
-                    ReceiveTimeout = Settings.ReceiveTimeoutOuter,
-                    SendTimeout = Settings.SendTimeout
+                    ReceiveTimeout = Settings.SecondaryReadTimeout,
+                    SendTimeout = Settings.WriteTimeout
                 };
             }
 
