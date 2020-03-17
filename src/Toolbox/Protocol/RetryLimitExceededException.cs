@@ -1,20 +1,20 @@
 ﻿namespace Toolbox.Protocol
 {
-    public class ReceiveRetryLimitExceededException : System.Exception
+    public class ReceiveRetryLimitExceededException : ProtocolException
     {
-        private const string CONST_EXCEPTION = "Retry Limit Exceeded Exception: ";
+        private const string CONST_EXCEPTION = "Retry Limit Exceeded Exception";
 
-        public ReceiveRetryLimitExceededException()
+        public ReceiveRetryLimitExceededException() : base(CONST_EXCEPTION)
         {
         }
 
         public ReceiveRetryLimitExceededException(string message)
-            : base(CONST_EXCEPTION + message)
+            : base($"{CONST_EXCEPTION}: {message}")
         {
         }
 
         public ReceiveRetryLimitExceededException(string message, System.Exception inner)
-            : base(CONST_EXCEPTION + message, inner)
+            : base($"{CONST_EXCEPTION}: {message}", inner)
         {
         }
     }
