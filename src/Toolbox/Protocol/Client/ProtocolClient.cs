@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Toolbox.Checksum;
@@ -6,7 +7,7 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public abstract class ProtocolClient<TProtocolSettings, TMessage, TMessageStatus> : IProtocolClient<TProtocolSettings, TMessage, TMessageStatus>
+    public abstract class ProtocolClient<TProtocolSettings, TMessage, TMessageStatus> : Protocol, IProtocolClient<TProtocolSettings, TMessage, TMessageStatus>
         where TProtocolSettings : IProtocolSettings
         where TMessage : IProtocolMessage<TProtocolSettings, TMessageStatus>
         where TMessageStatus : struct
@@ -14,7 +15,7 @@ namespace Toolbox.Protocol
         public IConnection Connection { get; protected set; }
         public IProtocolSettings Settings { get; protected set; }
 
-        public ProtocolClient(IConnection connection, IProtocolSettings settings)
+        public ProtocolClient(ILogger logger, IConnection connection, IProtocolSettings settings) : base(logger)
         {
             Connection = connection;
             Settings = settings;
@@ -179,8 +180,5 @@ namespace Toolbox.Protocol
             }
             return result;
         }
-
-        public abstract void Dispose();
-
     }
 }

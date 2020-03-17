@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,12 +14,7 @@ namespace Toolbox.Connection.Tcp
         public int Port { get; set; }
 
         #region Constructors
-        public TcpConnection() : base(new ConnectionSettings())
-        {
-
-        }
-
-        public TcpConnection(IConnectionSettings settings) : base(settings)
+        public TcpConnection(ILogger logger, IConnectionSettings settings) : base(logger, settings)
         {
 
         }
@@ -47,8 +43,8 @@ namespace Toolbox.Connection.Tcp
             {
                 Client = new TcpClient
                 {
-                    ReceiveTimeout = Settings.ReceiveTimeoutOuter,
-                    SendTimeout = Settings.SendTimeout
+                    ReceiveTimeout = Settings.SecondaryReadTimeout,
+                    SendTimeout = Settings.WriteTimeout
                 };
             }
 

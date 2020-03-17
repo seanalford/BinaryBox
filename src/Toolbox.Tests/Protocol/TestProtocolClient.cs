@@ -22,8 +22,8 @@ namespace Toolbox.Protocol.Test
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, SendRetries = sendRetries };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Get(settings).Item(1);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
             connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(false);
 
             // Act
@@ -46,8 +46,8 @@ namespace Toolbox.Protocol.Test
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, SendRetries = sendRetries };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Get(settings).Item(1);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
             connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(true);
             connection.ReadAsync(1, cancellationToken).Returns(message.Nak);
 
@@ -71,8 +71,8 @@ namespace Toolbox.Protocol.Test
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, ReceiveRetries = receiveRetries };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Get(settings).Item(1);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
             connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(true);
             connection.ReadAsync(1, cancellationToken).Returns(message.Ack);
             connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(new byte[0]);
@@ -97,8 +97,8 @@ namespace Toolbox.Protocol.Test
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, ReceiveRetries = receiveRetries };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Get(settings).Item(1);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
             connection.WriteAsync(Arg.Any<byte[]>(), CancellationToken.None).Returns(true);
             connection.ReadAsync(1, cancellationToken).Returns(message.Ack);
             connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(new byte[5] { 3, 2, 3, 4, 5 });
@@ -118,8 +118,8 @@ namespace Toolbox.Protocol.Test
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Get(settings).Item(expectedItem);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(expectedItem);
             CancellationToken cancellationToken = new CancellationToken();
 
             //connection.WriteAsync(Arg.Is<byte[]>(x => x.SequenceEqual(message.Encode())), cancellationToken).Returns(true);
@@ -143,8 +143,8 @@ namespace Toolbox.Protocol.Test
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum };
-            var client = new FakeClient(connection, settings);
-            var message = FakeProtocol.Set(settings);
+            var client = new FakeClient(LoggerFactory.Build(), connection, settings);
+            var message = FakeProtocol.Set(LoggerFactory.Build(), settings);
             CancellationToken cancellationToken = new CancellationToken();
             connection.WriteAsync(Arg.Any<byte[]>(), cancellationToken).Returns(true);
             connection.ReadAsync((byte)MessageTokens.ETX, cancellationToken, settings.Checksum.Length()).Returns(rxMessage);

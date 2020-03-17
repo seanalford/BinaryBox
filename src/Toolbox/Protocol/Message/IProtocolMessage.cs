@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Toolbox.Protocol
+﻿namespace Toolbox.Protocol
 {
-    public interface IProtocolMessage<TProtocolSettings, TMessageStatus> : IDisposable
+    public interface IProtocolMessage<TProtocolSettings, TMessageStatus> : IProtocol
         where TProtocolSettings : IProtocolSettings
         where TMessageStatus : struct
     {

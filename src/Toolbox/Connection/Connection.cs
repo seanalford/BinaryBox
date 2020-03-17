@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Buffers;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,17 +14,14 @@ namespace Toolbox.Connection
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
         private ReadResult ReadResult;
+        public ILogger Log { get; private set; }
         public IConnectionSettings Settings { get; set; }
         public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
         #region Constructors
-        public Connection() : this(new ConnectionSettings())
+        public Connection(ILogger logger, IConnectionSettings settings)
         {
-
-        }
-
-        public Connection(IConnectionSettings settings)
-        {
+            Log = logger;
             Settings = settings;
         }
         #endregion
@@ -95,8 +93,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -125,8 +123,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelOuterException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutOuter) { Pipe.Reader.Complete(); throw new ReadTimeoutOuterException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -145,8 +143,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
+                if (stopwatch.ElapsedMilliseconds > Settings.PrimaryReadTimeout) { throw new SecondartReadTimeoutException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
                 {
@@ -180,7 +178,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new ReadCancelInnerException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
                 //if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 int endOfTextIndex = Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText);
@@ -268,8 +266,8 @@ namespace Toolbox.Connection
                 if (await DataAvailableAsync().ConfigureAwait(false))
                 {
                     // Allocate bytes from the PipeWriter
-                    Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReceiveBufferSize);
-                    byte[] buffer = new byte[Settings.ReceiveBufferSize];
+                    Memory<byte> memory = Pipe.Writer.GetMemory(Settings.ReadBufferSize);
+                    byte[] buffer = new byte[Settings.ReadBufferSize];
                     try
                     {
                         int bytesRead = await ReadTask(buffer, cancellationToken).ConfigureAwait(false);

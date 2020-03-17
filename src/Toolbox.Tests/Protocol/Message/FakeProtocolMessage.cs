@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Text;
 using Toolbox.Checksum;
@@ -12,7 +13,7 @@ namespace Toolbox.Protocol.Test
         protected int _Item;
         protected float _Value;
 
-        public FakeProtocolMessage(IFakeProtocolSettings settings) : base(settings)
+        public FakeProtocolMessage(ILogger logger, IFakeProtocolSettings settings) : base(logger, settings)
         {
             Abort = BitConverter.GetBytes(MessageTokens.ESC);
             Ack = BitConverter.GetBytes(MessageTokens.ACK);

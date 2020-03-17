@@ -1,17 +1,30 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using System;
 using Toolbox.Checksum;
 using Xunit;
 
 namespace Toolbox.Protocol.Test
 {
+    public static class LoggerFactory
+    {
+        public static ILogger Build()
+        {
+
+            ILogger logger = null;
+            return logger;
+        }
+    }
+
     public class TestProtocolMessage
     {
+
+
         [Fact]
         public void TestDefaultProtocolMessage()
         {
-            // Arrange / Act
-            IProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus> protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings());
+            // Arrange / Act            
+            IProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus> protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings());
 
             //// Assert
             protocolMessage.Abort.Should().BeEquivalentTo(BitConverter.GetBytes(MessageTokens.ESC));
@@ -31,7 +44,7 @@ namespace Toolbox.Protocol.Test
         public void TestProtocolMessageDecode(FakeProtcolMessageStatus expectedStatus, int expectedItem, float expectedValue, ChecksumTypes checksum, byte[] rxMessage)
         {
             // Arrange
-            var protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings() { Checksum = checksum });
+            var protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
             bool result = protocolMessage.Decode(rxMessage);
 
             // Act
@@ -52,7 +65,7 @@ namespace Toolbox.Protocol.Test
         public void TestProtocolMessageEncode(byte[] expected, ChecksumTypes checksum)
         {
             // Arrange            
-            var protocolMessage = new FakeProtocolMessageGet(new FakeProtocolSettings() { Checksum = checksum });
+            var protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
 
             // Act
             protocolMessage.Item(1);
@@ -69,7 +82,7 @@ namespace Toolbox.Protocol.Test
         public void TestFakeProtocol(byte[] expected, ChecksumTypes checksum)
         {
             // Arrange
-            var fakeProtocolMessage = FakeProtocol.Get(new FakeProtocolSettings() { Checksum = checksum });
+            var fakeProtocolMessage = FakeProtocol.Get(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
 
             // Act
             fakeProtocolMessage.Item(1);
