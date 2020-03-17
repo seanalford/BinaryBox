@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Buffers;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,17 +14,14 @@ namespace Toolbox.Connection
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
         private ReadResult ReadResult;
+        public ILogger Log { get; private set; }
         public IConnectionSettings Settings { get; set; }
         public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
         #region Constructors
-        public Connection() : this(new ConnectionSettings())
+        public Connection(ILogger logger, IConnectionSettings settings)
         {
-
-        }
-
-        public Connection(IConnectionSettings settings)
-        {
+            Log = logger;
             Settings = settings;
         }
         #endregion

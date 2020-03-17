@@ -27,7 +27,7 @@ namespace Toolbox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection() { Host = host, Port = port };
+            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings()) { Host = host, Port = port };
 
             // Act
             ConnectionState state = await connection.ConnectAsync();
@@ -45,7 +45,7 @@ namespace Toolbox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection();
+            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings());
 
             // Act
             ConnectionState state = await connection.ConnectAsync(host, port);
@@ -63,7 +63,7 @@ namespace Toolbox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(new ConnectionSettings() { ReceiveTimeoutInner = 500 });
+            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings() { ReceiveTimeoutInner = 500 });
 
             // Act
             ConnectionState state = await connection.ConnectAsync(host, port);
@@ -80,7 +80,7 @@ namespace Toolbox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection();
+            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings());
 
             // Act
             ConnectionState state = await connection.ConnectAsync(host, port);
@@ -98,7 +98,7 @@ namespace Toolbox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(new ConnectionSettings() { ReceiveTimeoutInner = 500 });
+            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings() { ReceiveTimeoutInner = 500 });
 
             // Act
             ConnectionState state = await connection.ConnectAsync(host, port);

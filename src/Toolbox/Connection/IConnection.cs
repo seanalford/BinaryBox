@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ namespace Toolbox.Connection
 {
     public interface IConnection : IDisposable
     {
+        ILogger Log { get; }
         IConnectionSettings Settings { get; set; }
 
         ConnectionState State { get; }
