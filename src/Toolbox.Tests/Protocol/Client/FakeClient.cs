@@ -3,7 +3,7 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol.Test
 {
-    public class FakeClient : ProtocolClient<IFakeProtocolSettings, IFakeProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus>, FakeProtcolMessageStatus>
+    public class FakeClient : ProtocolClient<IFakeProtocolSettings, IFakeProtocolMessage<IFakeProtocolSettings>>
     {
         public FakeClient(ILogger logger, IConnection connection, IFakeProtocolSettings settings) : base(logger, connection, settings)
         {

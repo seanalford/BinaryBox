@@ -2,9 +2,8 @@
 
 namespace Toolbox.Protocol
 {
-    public abstract class ProtocolMessage<TProtocolSettings, TMessageStatus> : Protocol, IProtocolMessage<TProtocolSettings, TMessageStatus>
+    public abstract class ProtocolMessage<TProtocolSettings> : Protocol, IProtocolMessage<TProtocolSettings>
         where TProtocolSettings : IProtocolSettings
-        where TMessageStatus : struct
     {
         public ProtocolMessage(ILogger logger, TProtocolSettings settings) : base(logger)
         {
@@ -32,8 +31,6 @@ namespace Toolbox.Protocol
 
         public byte RxEndOfMessageToken { get; protected set; }
         public TProtocolSettings Settings { get; set; }
-
-        public TMessageStatus Status { get; protected set; }
 
         public int TxBytesToRead { get; protected set; }
 

@@ -7,7 +7,7 @@ using Toolbox.IEEE;
 
 namespace Toolbox.Protocol.Test
 {
-    public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus>, IFakeProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus>
+    public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings>, IFakeProtocolMessage<IFakeProtocolSettings>
     {
         protected FakeProtcolMessageTypes _Type;
         protected int _Item;
@@ -21,25 +21,12 @@ namespace Toolbox.Protocol.Test
             Nak = BitConverter.GetBytes(MessageTokens.NAK);
             RxBytesToRead = 0;
             RxEndOfMessageToken = (byte)MessageTokens.ETX;
-            Status = FakeProtcolMessageStatus.FAIL;
             TxBytesToRead = 1;
             TxEndOfMessageToken = 0;
             ValidateTx = true;
         }
 
         public override bool Decode(byte[] data)
-        {
-            Status = FakeProtcolMessageStatus.FAIL;
-
-            if (DecodeMessage(data))
-            {
-                Status = FakeProtcolMessageStatus.SUCCESS;
-            }
-
-            return Status == FakeProtcolMessageStatus.SUCCESS;
-        }
-
-        public virtual bool DecodeMessage(byte[] data)
         {
             if ((data.Length == 0) ||
                         (data[0] != MessageTokens.STX) ||
@@ -66,7 +53,6 @@ namespace Toolbox.Protocol.Test
             _Value = Encoding.ASCII.GetString(message, 6, 8).ToFloat();
 
             return true;
-
         }
 
         public override void Dispose() { }
