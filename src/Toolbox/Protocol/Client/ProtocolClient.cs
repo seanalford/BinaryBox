@@ -7,10 +7,9 @@ using Toolbox.Connection;
 
 namespace Toolbox.Protocol
 {
-    public abstract class ProtocolClient<TProtocolSettings, TMessage, TMessageStatus> : Protocol, IProtocolClient<TProtocolSettings, TMessage, TMessageStatus>
+    public abstract class ProtocolClient<TProtocolSettings, TMessage> : Protocol, IProtocolClient<TProtocolSettings, TMessage>
         where TProtocolSettings : IProtocolSettings
-        where TMessage : IProtocolMessage<TProtocolSettings, TMessageStatus>
-        where TMessageStatus : struct
+        where TMessage : IProtocolMessage<TProtocolSettings>
     {
         public IConnection Connection { get; protected set; }
         public IProtocolSettings Settings { get; protected set; }
@@ -27,13 +26,13 @@ namespace Toolbox.Protocol
         /// <param name="message">The TMessage to send to the host.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting messageg status</returns>
-        public async Task<TMessageStatus> SendAsync(TMessage message, CancellationToken cancellationToken)
+        public async Task<IProtocolClientStatus> SendAsync(TMessage message, CancellationToken cancellationToken)
         {
-
             message.ClearData();
 
-            TMessageStatus result = default;
-            if (await Tx(message, cancellationToken))
+            var result = await Tx(message, cancellationToken);
+
+            if (result.Status == ProtocolClientStatusCodes.OK)
             {
                 result = await Rx(message, cancellationToken);
             }
@@ -46,29 +45,46 @@ namespace Toolbox.Protocol
         /// <param name="message">IHexAsciiMessage to send</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns True is if responce is HexAsciiMessageStatus.ACK, otherwise False.</returns>
-        private async Task<bool> Tx(TMessage message, CancellationToken cancellationToken)
+        private async Task<IProtocolClientStatus> Tx(TMessage message, CancellationToken cancellationToken)
         {
-            bool result = false;
+            IProtocolClientStatus result;
             int retires = 0;
 
             while (true)
             {
-                // Send encoded message.
-                if (await Connection.WriteAsync(message.Encode(), cancellationToken))
+                try
                 {
-                    // Validate Trasmission?
-                    if (message.ValidateTx)
+                    // Send encoded message.
+                    if (await Connection.WriteAsync(message.Encode(), cancellationToken))
                     {
-                        // Valid Repsonce?
-                        if (message.ValidTx(await TxResult(message, cancellationToken)))
+                        // Validate Trasmission?
+                        if (message.ValidateTx)
                         {
-                            result = true;
+                            // Valid Repsonce?
+                            if (message.ValidTx(await TxResult(message, cancellationToken)))
+                            {
+                                result = new ProtocolClientStatus(ProtocolClientStatusCodes.OK);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            result = new ProtocolClientStatus(ProtocolClientStatusCodes.OK);
                             break;
                         }
                     }
-                    else { result = true; break; }
                 }
-                if (retires++ == Settings.SendRetries) { throw new SendRetryLimitExceededException(); }
+                catch (Exception ex)
+                {
+                    Log?.LogError(ex, ex.Message);
+                }
+
+                if (retires++ == Settings.SendRetries)
+                {
+                    result = new ProtocolClientStatus(ProtocolClientStatusCodes.SendRetryLimitExceeded);
+                    Log?.LogInformation(result.Description);
+                    break;
+                }
             }
             return result;
         }
@@ -79,34 +95,49 @@ namespace Toolbox.Protocol
         /// <param name="message">The IHexAsciiMessage to be received.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting HexAsciiMessageResult</returns>
-        private async Task<TMessageStatus> Rx(TMessage message, CancellationToken cancellationToken)
+        private async Task<IProtocolClientStatus> Rx(TMessage message, CancellationToken cancellationToken)
         {
-            TMessageStatus result = default;
+            IProtocolClientStatus result;
             int retires = 0;
 
             while (true)
             {
-                byte[] data = await RxRead(message, cancellationToken);
-
-                if (message.Decode(data))
+                try
                 {
-                    // Send ACK to host to signal message received.
-                    await SendAck(message, cancellationToken);
+                    byte[] data = await RxRead(message, cancellationToken);
 
-                    message.DecodeData();
-
-                    if (message.Complete) { result = message.Status; break; }
-
-                }
-                else
-                {
-                    if (retires++ == Settings.ReceiveRetries)
+                    if (message.Decode(data))
                     {
-                        // Send Abort signal to the host?
-                        await SendAbort(message, cancellationToken);
-                        throw new ReceiveRetryLimitExceededException();
+                        // Send ACK to host to signal message received.
+                        await SendAck(message, cancellationToken);
+
+                        message.DecodeData();
+
+                        if (message.Complete)
+                        {
+                            result = new ProtocolClientStatus(ProtocolClientStatusCodes.OK);
+                            break;
+                        }
                     }
-                    else { await SendNak(message, cancellationToken); }
+                    else
+                    {
+                        if (retires++ == Settings.ReceiveRetries)
+                        {
+                            result = new ProtocolClientStatus(ProtocolClientStatusCodes.ReceiveRetryLimitExceeded);
+                            Log?.LogInformation(result.Description);
+                            // Send Abort signal to the host?
+                            await SendAbort(message, cancellationToken);
+                            break;
+                        }
+                        else
+                        {
+                            await SendNak(message, cancellationToken);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log?.LogError(ex, ex.Message);
                 }
             }
             return result;
@@ -176,7 +207,7 @@ namespace Toolbox.Protocol
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);                
+                //TODO:Log?.Exception(ex);                
             }
             return result;
         }

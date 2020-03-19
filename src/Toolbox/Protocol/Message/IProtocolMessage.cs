@@ -1,8 +1,7 @@
 ﻿namespace Toolbox.Protocol
 {
-    public interface IProtocolMessage<TProtocolSettings, TMessageStatus> : IProtocol
+    public interface IProtocolMessage<TProtocolSettings> : IProtocol
         where TProtocolSettings : IProtocolSettings
-        where TMessageStatus : struct
     {
         byte[] Abort { get; }
         byte[] Ack { get; }
@@ -16,7 +15,6 @@
         int RxBytesToRead { get; }
         byte RxEndOfMessageToken { get; }
         TProtocolSettings Settings { get; set; }
-        TMessageStatus Status { get; }
         int TxBytesToRead { get; }
         byte TxEndOfMessageToken { get; }
         bool ValidateTx { get; }

@@ -24,7 +24,7 @@ namespace Toolbox.Protocol.Test
         public void TestDefaultProtocolMessage()
         {
             // Arrange / Act            
-            IProtocolMessage<IFakeProtocolSettings, FakeProtcolMessageStatus> protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings());
+            IProtocolMessage<IFakeProtocolSettings> protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings());
 
             //// Assert
             protocolMessage.Abort.Should().BeEquivalentTo(BitConverter.GetBytes(MessageTokens.ESC));
@@ -39,9 +39,9 @@ namespace Toolbox.Protocol.Test
         }
 
         [Theory]
-        [InlineData(FakeProtcolMessageStatus.SUCCESS, 1, 0, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
-        [InlineData(FakeProtcolMessageStatus.SUCCESS, 2, 1, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 50, 51, 70, 56, 48, 48, 48, 48, 48, 3 })]
-        public void TestProtocolMessageDecode(FakeProtcolMessageStatus expectedStatus, int expectedItem, float expectedValue, ChecksumTypes checksum, byte[] rxMessage)
+        [InlineData(true, 1, 0, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
+        [InlineData(true, 2, 1, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 50, 51, 70, 56, 48, 48, 48, 48, 48, 3 })]
+        public void TestProtocolMessageDecode(bool expectedStatus, int expectedItem, float expectedValue, ChecksumTypes checksum, byte[] rxMessage)
         {
             // Arrange
             var protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
@@ -51,8 +51,7 @@ namespace Toolbox.Protocol.Test
             protocolMessage.DecodeData();
 
             // Arrange 
-            result.Should().BeTrue();
-            protocolMessage.Status.Should().Be(expectedStatus);
+            result.Should().Be(expectedStatus);
             protocolMessage.Data.Item.Should().Be(expectedItem);
             protocolMessage.Data.Value.Should().Be(expectedValue);
 
