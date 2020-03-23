@@ -45,8 +45,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return State;
         }
@@ -73,8 +73,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return State;
         }
@@ -248,8 +248,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return result;
         }
@@ -281,7 +281,7 @@ namespace Toolbox.Connection
                     }
                     catch (Exception ex)
                     {
-                        //TODO:Log.Exception(ex);
+                        Log?.LogError(ex, ex.Message);
                         break;
                     }
                 }
