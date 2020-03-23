@@ -12,6 +12,7 @@ namespace Toolbox.Connection
     public abstract class Connection : IConnection, INotifyPropertyChanged
     {
         public const string PRIMARY_READ_CANCELLATION_EXCEPTION = "Primary Read Cancellation Exception";
+        public const string SECONDARY_READ_CANCELLATION_EXCEPTION = "Secondary Read Cancellation Exception";
 
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -145,7 +146,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(SECONDARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
                 if (stopwatch.ElapsedMilliseconds > Settings.PrimaryReadTimeout) { throw new SecondartReadTimeoutException(); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
@@ -180,7 +181,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(SECONDARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
                 //if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
 
                 int endOfTextIndex = Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText);

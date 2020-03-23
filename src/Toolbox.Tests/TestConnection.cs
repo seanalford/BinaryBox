@@ -276,7 +276,8 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(5, cancellationTokenSource.Token));
 
             // Assert
-            result.Should().BeOfType<CancelSecondaryReadException>();
+            result.Should().BeOfType<OperationCanceledException>();
+            result.Message.Should().Be(Connection.SECONDARY_READ_CANCELLATION_EXCEPTION);
         }
 
         [Theory(Timeout = 5000)]
