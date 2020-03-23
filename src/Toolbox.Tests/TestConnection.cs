@@ -203,7 +203,7 @@ namespace Toolbox.Connection.Test
 
         [Theory(DisplayName = "Test ReadAsync(bytesToRead) outer timeout.")]
         [InlineData(1000)]
-        public async Task TestConnectionReadAsyncBytesOuterTimeouts(int timeout)
+        public async Task TestConnectionReadAsyncBytesPrimaryTimeouts(int timeout)
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
@@ -223,7 +223,7 @@ namespace Toolbox.Connection.Test
         [InlineData(new byte[] { 1, 2, 3, 4 }, 4, 1000, 1001)]
         [InlineData(new byte[] { 1, 2, 3, 4 }, 2, 2000, 2001)]
         [InlineData(new byte[] { 1, 2, 3, 4 }, 4, 2000, 2001)]
-        public async Task TestConnectionReadAsyncBytesInnerTimeout(byte[] rxMessage, int bytesToRead, int timeout, int delay)
+        public async Task TestConnectionReadAsyncBytesSecondaryTimeout(byte[] rxMessage, int bytesToRead, int timeout, int delay)
         {
             // Arrange
             IConnectionSettings connectionSettings = new ConnectionSettings();
@@ -235,12 +235,13 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(bytesToRead, CancellationToken.None));
 
             // Assert
-            result.Should().BeOfType<SecondartReadTimeoutException>();
+            result.Should().BeOfType<TimeoutException>();
+            result.Message.Should().Be(Connection.SECONDARY_READ_TIMEOUT_EXCEPTION);
         }
 
         [Theory]
         [InlineData(new byte[] { 1, 2, 3, 4 })]
-        public async Task TestConnectionReadAsyncBytesOuterCancel(byte[] rxMessage)
+        public async Task TestConnectionReadAsyncBytesPrimaryCancel(byte[] rxMessage)
         {
             // Arrange
             CancellationTokenSource cancellationTokenSource =
@@ -262,7 +263,7 @@ namespace Toolbox.Connection.Test
 
         [Theory]
         [InlineData(new byte[] { 1, 2, 3, 4 })]
-        public async Task TestConnectionReadAsyncBytesInnerCancel(byte[] rxMessage)
+        public async Task TestConnectionReadAsyncBytesSecondaryCancel(byte[] rxMessage)
         {
             // Arrange
             CancellationTokenSource cancellationTokenSource =
