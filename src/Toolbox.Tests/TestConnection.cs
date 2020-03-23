@@ -214,7 +214,8 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, CancellationToken.None));
 
             // Assert
-            result.Should().BeOfType<PrimaryReadTimeoutException>();
+            result.Should().BeOfType<TimeoutException>();
+            result.Message.Should().Be(Connection.PRIMARY_READ_TIMEOUT_EXCEPTION);
         }
 
         [Theory]
