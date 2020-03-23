@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Toolbox.Connection.Test
 {
-    public class TestConnection
+    public partial class TestConnection
     {
         public static class LoggerFactory
         {
@@ -20,7 +20,7 @@ namespace Toolbox.Connection.Test
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection Create with Settings", Timeout = 1000)]
         public void TestConnectionCreationWithSettings()
         {
             // Arrange
@@ -35,7 +35,7 @@ namespace Toolbox.Connection.Test
             connection.Should().BeAssignableTo<IConnection>();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection ConnectAsync", Timeout = 1000)]
         public async Task TestConnectionConnectAsync()
         {
             // Arrange
@@ -48,20 +48,20 @@ namespace Toolbox.Connection.Test
             result.Should().Be(ConnectionState.Connected);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection ConnectAsync with Delay", Timeout = 1000)]
         public async Task TestConnectionConnectAsyncWithDelay()
         {
             // Arrange
-            var connection = new ConnectionFake(LoggerFactory.Build(), new ConnectionSettings()) { ExpectedResult = true, TaskDelay = 10 };
+            var connection = new ConnectionFake(LoggerFactory.Build(), new ConnectionSettings()) { ExpectedResult = true, TaskDelay = 100 };
 
             // Act
-            await connection.ConnectAsync();
+            connection.ConnectAsync();
 
             // Assert
             connection.State.Should().Be(ConnectionState.Connecting);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection DisconnectAsync", Timeout = 1000)]
         public async Task TestConnectionDisconnectAsync()
         {
             // Arrange
@@ -75,21 +75,21 @@ namespace Toolbox.Connection.Test
             connection.State.Should().Be(ConnectionState.Disconnected);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection DisconnectAsync with Delay", Timeout = 1000)]
         public async Task TestConnectionDisconnectAsyncWithDelay()
         {
             // Arrange
-            var connection = new ConnectionFake(LoggerFactory.Build(), new ConnectionSettings()) { ExpectedResult = true, TaskDelay = 10 };
+            var connection = new ConnectionFake(LoggerFactory.Build(), new ConnectionSettings()) { ExpectedResult = true, TaskDelay = 100 };
 
             // Act
             await connection.ConnectAsync();
-            await connection.DisconnectAsync();
+            connection.DisconnectAsync();
 
             // Assert
             connection.State.Should().Be(ConnectionState.Disconnecting);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection DataAvailableAsync No Data", Timeout = 1000)]
         public async Task TestConnectionNoDataAvailable()
         {
             // Arrange
@@ -102,7 +102,7 @@ namespace Toolbox.Connection.Test
             result.Should().BeFalse();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection DataAvailableAsync Data Available", Timeout = 1000)]
         public async Task TestConnectionDataAvailable()
         {
             // Arrange
@@ -119,7 +119,7 @@ namespace Toolbox.Connection.Test
             dataAvailable.Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Connection WriteAsync", Timeout = 1000)]
         public async Task TestConnectionWriteAsync()
         {
             // Arrange
@@ -133,7 +133,7 @@ namespace Toolbox.Connection.Test
             result.Should().BeTrue();
         }
 
-        [Theory]
+        [Theory(Timeout = 1000)]
         [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 1, new byte[] { 1 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 2, new byte[] { 1, 2 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5 }, 3, new byte[] { 1, 2, 3 })]
@@ -155,7 +155,7 @@ namespace Toolbox.Connection.Test
             result.Should().BeEquivalentTo(expectedResult);
         }
 
-        [Theory]
+        [Theory(Timeout = 100)]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 1, new byte[] { 2 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 2, new byte[] { 3, 4 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7 }, 3, new byte[] { 4, 5, 6 })]
@@ -176,7 +176,7 @@ namespace Toolbox.Connection.Test
             result.Should().BeEquivalentTo(expectedResult);
         }
 
-        [Theory]
+        [Theory(Timeout = 100)]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 10, new byte[] { 2 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 4, 10, new byte[] { 5, 6, 7, 8 })]
         [InlineData(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 1, 250, new byte[] { 2 })]
@@ -201,7 +201,7 @@ namespace Toolbox.Connection.Test
 
         }
 
-        [Theory(DisplayName = "Test ReadAsync(bytesToRead) outer timeout.")]
+        [Theory(Timeout = 100)]
         [InlineData(1000)]
         public async Task TestConnectionReadAsyncBytesPrimaryTimeouts(int timeout)
         {
@@ -218,7 +218,7 @@ namespace Toolbox.Connection.Test
             result.Message.Should().Be(Connection.PRIMARY_READ_TIMEOUT_EXCEPTION);
         }
 
-        [Theory]
+        [Theory(Timeout = 100)]
         [InlineData(new byte[] { 1 }, 2, 1000, 1001)]
         [InlineData(new byte[] { 1, 2, 3, 4 }, 4, 1000, 1001)]
         [InlineData(new byte[] { 1, 2, 3, 4 }, 2, 2000, 2001)]
@@ -239,7 +239,7 @@ namespace Toolbox.Connection.Test
             result.Message.Should().Be(Connection.SECONDARY_READ_TIMEOUT_EXCEPTION);
         }
 
-        [Theory]
+        [Theory(Timeout = 100)]
         [InlineData(new byte[] { 1, 2, 3, 4 })]
         public async Task TestConnectionReadAsyncBytesPrimaryCancel(byte[] rxMessage)
         {
@@ -261,7 +261,7 @@ namespace Toolbox.Connection.Test
 
         }
 
-        [Theory]
+        [Theory(Timeout = 100)]
         [InlineData(new byte[] { 1, 2, 3, 4 })]
         public async Task TestConnectionReadAsyncBytesSecondaryCancel(byte[] rxMessage)
         {
@@ -311,54 +311,6 @@ namespace Toolbox.Connection.Test
 
             // Assert    
             result.Should().BeEquivalentTo(expectedResult);
-        }
-
-        public class ConnectionFake : Connection
-        {
-            private HostFake Host;
-            public int TaskDelay = 0;
-            public bool ExpectedResult = false;
-
-            public ConnectionFake(ILogger logger, IConnectionSettings settings) : base(logger, settings)
-            {
-                Host = new HostFake();
-            }
-
-            public override async Task<bool> DataAvailableAsync()
-            {
-                return await Host.DataAvaliable();
-            }
-
-            public override void Dispose()
-            {
-                Host.Dispose();
-            }
-
-            protected async override Task<bool> ConnectTask()
-            {
-                return await Host.ConnectAsync(TaskDelay, ExpectedResult);
-            }
-
-            protected async override Task<bool> DisconnectTask()
-            {
-                return await Host.DisconnectAsync(TaskDelay, ExpectedResult);
-            }
-
-            protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
-            {
-                return await Host.ReadAsync(data, cancellationToken);
-            }
-
-            protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
-            {
-                return await Host.WriteAsync(data, cancellationToken);
-            }
-
-            public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0)
-            {
-                await Host.WriteToInputRxBuffer(data, delayPerByte);
-            }
-
         }
 
         public class HostFake : IDisposable
