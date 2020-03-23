@@ -11,6 +11,8 @@ namespace Toolbox.Connection
 {
     public abstract class Connection : IConnection, INotifyPropertyChanged
     {
+        public const string PRIMARY_READ_CANCELLATION_EXCEPTION = "Primary Read Cancellation Exception";
+
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
         private ReadResult ReadResult;
@@ -93,7 +95,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(PRIMARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
                 if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
@@ -123,7 +125,7 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(PRIMARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
                 if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))

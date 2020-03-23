@@ -254,7 +254,9 @@ namespace Toolbox.Connection.Test
             var result = await Record.ExceptionAsync(async () => await connection.ReadAsync(1, cancellationTokenSource.Token));
 
             // Assert
-            result.Should().BeOfType<CancelPrimaryReadException>();
+            result.Should().BeOfType<OperationCanceledException>();
+            result.Message.Should().Be(Connection.PRIMARY_READ_CANCELLATION_EXCEPTION);
+
         }
 
         [Theory]
