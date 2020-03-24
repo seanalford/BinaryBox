@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toolbox.Connection
+namespace BinaryBox.Connection
 {
     public abstract class ConnectionException : Exception
     {

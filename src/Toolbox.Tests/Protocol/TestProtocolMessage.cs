@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Checksum;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System;
-using Toolbox.Checksum;
 using Xunit;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public static class LoggerFactory
     {

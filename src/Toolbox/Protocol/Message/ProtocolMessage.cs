@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Toolbox.Protocol
+namespace BinaryBox.Protocol
 {
     public abstract class ProtocolMessage<TProtocolSettings> : Protocol, IProtocolMessage<TProtocolSettings>
         where TProtocolSettings : IProtocolSettings

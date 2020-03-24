@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Checksum;
+using FluentAssertions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Checksum;
 using Xunit;
 
-namespace Toolbox.Connection.Test
+namespace BinaryBox.Connection.Test
 {
     public partial class TestConnection
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toolbox.Protocol
+namespace BinaryBox.Protocol
 {
     public abstract class ProtocolException : Exception
     {

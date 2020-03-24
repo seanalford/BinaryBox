@@ -7,7 +7,7 @@ using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Toolbox.Connection
+namespace BinaryBox.Connection
 {
     public abstract class Connection : IConnection, INotifyPropertyChanged
     {

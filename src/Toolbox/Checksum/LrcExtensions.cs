@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace Toolbox.Checksum
+﻿namespace BinaryBox.Checksum
 {
     public static class LrcExtensions
     {

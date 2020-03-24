@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Toolbox.Terminal
+namespace BinaryBox.Terminal
 {
     class Program
     {

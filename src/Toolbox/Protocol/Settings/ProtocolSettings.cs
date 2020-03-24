@@ -1,6 +1,6 @@
-﻿using Toolbox.Checksum;
+﻿using BinaryBox.Checksum;
 
-namespace Toolbox.Protocol
+namespace BinaryBox.Protocol
 {
     public class ProtocolSettings : IProtocolSettings
     {

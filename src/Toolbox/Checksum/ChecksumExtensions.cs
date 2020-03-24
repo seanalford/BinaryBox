@@ -1,4 +1,4 @@
-﻿namespace Toolbox.Checksum
+﻿namespace BinaryBox.Checksum
 {
     public static partial class ChecksumExtensions
     {

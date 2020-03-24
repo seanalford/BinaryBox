@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BinaryBox.Checksum;
+using BinaryBox.Connection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Checksum;
-using Toolbox.Connection;
 
-namespace Toolbox.Protocol
+namespace BinaryBox.Protocol
 {
     public abstract class ProtocolClient<TProtocolSettings, TMessage> : Protocol, IProtocolClient<TProtocolSettings, TMessage>
         where TProtocolSettings : IProtocolSettings

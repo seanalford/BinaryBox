@@ -1,4 +1,4 @@
-﻿namespace Toolbox.Tests.Connection
+﻿namespace BinaryBox.Tests.Connection
 {
     public partial class TestConnection
     {

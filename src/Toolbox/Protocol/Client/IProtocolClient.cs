@@ -1,8 +1,8 @@
-﻿using System.Threading;
+﻿using BinaryBox.Connection;
+using System.Threading;
 using System.Threading.Tasks;
-using Toolbox.Connection;
 
-namespace Toolbox.Protocol
+namespace BinaryBox.Protocol
 {
     public interface IProtocolClient<TProtocolSettings, TMessage> : IProtocol
         where TProtocolSettings : IProtocolSettings

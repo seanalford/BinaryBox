@@ -1,8 +1,8 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
+using System;
 using Xunit;
 
-namespace Toolbox.IEEE.Test
+namespace BinaryBox.IEEE.Test
 {
     public class TestToolboxExtentionsIEEE
     {
@@ -10,11 +10,11 @@ namespace Toolbox.IEEE.Test
         [Theory]
         [InlineData(float.PositiveInfinity, "7F800000")]
         [InlineData(float.NegativeInfinity, "FF800000")]
-        [InlineData(float.MaxValue,         "7F7FFFFF")]
-        [InlineData(float.MinValue,         "FF7FFFFF")]
-        [InlineData(float.Epsilon,          "00000001")]
-        [InlineData(-float.Epsilon,         "80000001")]
-        [InlineData(0,                      "00000000")]
+        [InlineData(float.MaxValue, "7F7FFFFF")]
+        [InlineData(float.MinValue, "FF7FFFFF")]
+        [InlineData(float.Epsilon, "00000001")]
+        [InlineData(-float.Epsilon, "80000001")]
+        [InlineData(0, "00000000")]
 
         public void IEEE_Float_To_4Byte_String_BigEndian(float inputValue, string expectedString)
         {
@@ -31,11 +31,11 @@ namespace Toolbox.IEEE.Test
         [Theory]
         [InlineData(float.PositiveInfinity, "0000807F")]
         [InlineData(float.NegativeInfinity, "000080FF")]
-        [InlineData(float.MaxValue,         "FFFF7F7F")]
-        [InlineData(float.MinValue,         "FFFF7FFF")]
-        [InlineData(float.Epsilon,          "01000000")]
-        [InlineData(-float.Epsilon,         "01000080")]
-        [InlineData(0,                      "00000000")]
+        [InlineData(float.MaxValue, "FFFF7F7F")]
+        [InlineData(float.MinValue, "FFFF7FFF")]
+        [InlineData(float.Epsilon, "01000000")]
+        [InlineData(-float.Epsilon, "01000080")]
+        [InlineData(0, "00000000")]
 
         public void IEEE_Float_To_4Byte_String_LittleEndian(float inputValue, string expectedString)
         {

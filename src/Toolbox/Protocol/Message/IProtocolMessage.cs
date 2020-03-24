@@ -1,4 +1,4 @@
-﻿namespace Toolbox.Protocol
+﻿namespace BinaryBox.Protocol
 {
     public interface IProtocolMessage<TProtocolSettings> : IProtocol
         where TProtocolSettings : IProtocolSettings

@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using Toolbox.Connection;
+﻿using BinaryBox.Connection;
+using Microsoft.Extensions.Logging;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public class FakeClient : ProtocolClient<IFakeProtocolSettings, IFakeProtocolMessage<IFakeProtocolSettings>>
     {

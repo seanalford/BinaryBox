@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public class FakeProtocolMessageSet : FakeProtocolMessage, IFakeProtocolMessageSetItem
     {

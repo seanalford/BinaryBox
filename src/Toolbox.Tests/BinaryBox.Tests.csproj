@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Toolbox\Toolbox.csproj" />
+    <ProjectReference Include="..\Toolbox\BinaryBox.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BinaryBox.Checksum;
+using BinaryBox.IEEE;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Text;
-using Toolbox.Checksum;
-using Toolbox.IEEE;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings>, IFakeProtocolMessage<IFakeProtocolSettings>
     {

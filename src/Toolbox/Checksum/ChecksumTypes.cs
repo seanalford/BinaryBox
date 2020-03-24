@@ -1,9 +1,9 @@
-﻿namespace Toolbox.Checksum
+﻿namespace BinaryBox.Checksum
 {
-    public enum ChecksumTypes 
-    { 
-        None, 
+    public enum ChecksumTypes
+    {
+        None,
         LRC,
-        CRC16 
+        CRC16
     };
 }

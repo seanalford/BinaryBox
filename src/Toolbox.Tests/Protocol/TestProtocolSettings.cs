@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
-using Toolbox.Checksum;
+﻿using BinaryBox.Checksum;
+using FluentAssertions;
 using Xunit;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public class TestProtocolSettings
     {

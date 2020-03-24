@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Toolbox.Connection
+namespace BinaryBox.Connection
 {
     public interface IConnection : IDisposable
     {

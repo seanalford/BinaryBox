@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Checksum;
+using BinaryBox.Connection;
+using FluentAssertions;
 using NSubstitute;
 using System.Threading;
-using Toolbox.Checksum;
-using Toolbox.Connection;
 using Xunit;
 
-namespace Toolbox.Protocol.Test
+namespace BinaryBox.Protocol.Test
 {
     public class TestProtocolClient
     {

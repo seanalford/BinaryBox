@@ -1,4 +1,4 @@
-namespace Toolbox.Connection
+namespace BinaryBox.Connection
 {
     public interface IConnectionSettings
     {

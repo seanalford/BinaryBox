@@ -1,4 +1,4 @@
-﻿namespace Toolbox.Protocol
+﻿namespace BinaryBox.Protocol
 {
     public interface IProtocolMessageData
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Toolbox.Connection
+namespace BinaryBox.Connection
 {
     public class ConnectionSettings : IConnectionSettings, INotifyPropertyChanged
     {

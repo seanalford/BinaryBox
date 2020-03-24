@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Toolbox.Connection.Tcp
+namespace BinaryBox.Connection.Tcp
 {
     public interface ITcpConnection : IConnection
     {

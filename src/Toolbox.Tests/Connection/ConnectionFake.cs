@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Toolbox.Connection.Test
+namespace BinaryBox.Connection.Test
 {
     public partial class TestConnection
     {

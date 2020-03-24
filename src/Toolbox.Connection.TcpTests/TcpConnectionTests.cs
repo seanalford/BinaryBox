@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Xunit;
 
-namespace Toolbox.Connection.Tcp.Tests
+namespace BinaryBox.Connection.Tcp.Tests
 {
     public class TcpConnectionTests
     {

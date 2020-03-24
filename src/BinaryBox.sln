@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A11ECCCF-9BF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9AD0C034-EDD3-462A-8631-16679592059A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox.Terminal", "Toolbox.Terminal\Toolbox.Terminal.csproj", "{71E2C0EB-9BBE-4E66-B3F2-5FE3F2DF4CBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Terminal", "Toolbox.Terminal\BinaryBox.Terminal.csproj", "{71E2C0EB-9BBE-4E66-B3F2-5FE3F2DF4CBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox", "Toolbox\Toolbox.csproj", "{AB8CDF7B-3EC9-4EE3-B796-18284D125B97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Core", "Toolbox\BinaryBox.Core.csproj", "{AB8CDF7B-3EC9-4EE3-B796-18284D125B97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox.Tests", "Toolbox.Tests\Toolbox.Tests.csproj", "{C3E441B2-ADC5-461D-A725-887DBA689B89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Tests", "Toolbox.Tests\BinaryBox.Tests.csproj", "{C3E441B2-ADC5-461D-A725-887DBA689B89}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox.Connection.Tcp", "Toolbox.Connection.Tcp\Toolbox.Connection.Tcp.csproj", "{8EDABE24-355E-4CA8-B00A-B58F6B17E848}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Connection.Tcp", "Toolbox.Connection.Tcp\BinaryBox.Connection.Tcp.csproj", "{8EDABE24-355E-4CA8-B00A-B58F6B17E848}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{8AC9A536-23CE-4181-B9A4-29FAB005E428}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolbox.Connection.TcpTests", "Toolbox.Connection.TcpTests\Toolbox.Connection.TcpTests.csproj", "{398ED87E-D7D4-4627-9E9B-CD7402E2F2F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Connection.TcpTests", "Toolbox.Connection.TcpTests\BinaryBox.Connection.TcpTests.csproj", "{398ED87E-D7D4-4627-9E9B-CD7402E2F2F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

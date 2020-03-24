@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Toolbox.Connection
+﻿namespace BinaryBox.Connection
 {
     public enum ConnectionState
     {

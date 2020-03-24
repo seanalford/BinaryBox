@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toolbox.IEEE
+namespace BinaryBox.IEEE
 {
     public static class IEEEExtensions
     {

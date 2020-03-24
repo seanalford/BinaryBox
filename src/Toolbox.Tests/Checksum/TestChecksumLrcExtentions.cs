@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Xunit;
 
-namespace Toolbox.Checksum.Test
+namespace BinaryBox.Checksum.Test
 {
     public class TestChecksumLrcExtentions
     {

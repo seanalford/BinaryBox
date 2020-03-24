@@ -1,4 +1,4 @@
-﻿namespace Toolbox.Protocol
+﻿namespace BinaryBox.Protocol
 {
     // TODO: Convert to ENUM
     public class MessageTokens

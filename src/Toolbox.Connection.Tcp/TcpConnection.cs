@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Toolbox.Connection.Tcp
+namespace BinaryBox.Connection.Tcp
 {
     public class TcpConnection : Connection, ITcpConnection
     {
