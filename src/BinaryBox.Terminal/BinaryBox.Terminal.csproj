@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Toolbox.Connection.Tcp\BinaryBox.Connection.Tcp.csproj" />
+    <ProjectReference Include="..\BinaryBox.Connection.Tcp\BinaryBox.Connection.Tcp.csproj" />
   </ItemGroup>
 
 </Project>

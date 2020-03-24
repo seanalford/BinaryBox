@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Toolbox\BinaryBox.Core.csproj" />
+    <ProjectReference Include="..\BinaryBox\BinaryBox.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
