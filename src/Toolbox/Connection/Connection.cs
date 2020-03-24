@@ -11,6 +11,11 @@ namespace Toolbox.Connection
 {
     public abstract class Connection : IConnection, INotifyPropertyChanged
     {
+        public const string PRIMARY_READ_CANCELLATION_EXCEPTION = "Primary Read Cancellation Exception";
+        public const string SECONDARY_READ_CANCELLATION_EXCEPTION = "Secondary Read Cancellation Exception";
+        public const string PRIMARY_READ_TIMEOUT_EXCEPTION = "Primary Read Timeout Exception";
+        public const string SECONDARY_READ_TIMEOUT_EXCEPTION = "Secondary Read Timeout Exception";
+
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
         private ReadResult ReadResult;
@@ -18,13 +23,11 @@ namespace Toolbox.Connection
         public IConnectionSettings Settings { get; set; }
         public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
-        #region Constructors
         public Connection(ILogger logger, IConnectionSettings settings)
         {
             Log = logger;
             Settings = settings;
         }
-        #endregion
 
         /// <summary>
         /// Connects the IConnection to a remote end point.
@@ -40,8 +43,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return State;
         }
@@ -68,8 +71,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return State;
         }
@@ -93,8 +96,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(PRIMARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
+                if (stopwatch.ElapsedMilliseconds > Settings.PrimaryReadTimeout) { Pipe.Reader.Complete(); throw new TimeoutException(PRIMARY_READ_TIMEOUT_EXCEPTION); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -123,8 +126,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelPrimaryReadException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { Pipe.Reader.Complete(); throw new PrimaryReadTimeoutException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(PRIMARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
+                if (stopwatch.ElapsedMilliseconds > Settings.PrimaryReadTimeout) { Pipe.Reader.Complete(); throw new TimeoutException(PRIMARY_READ_TIMEOUT_EXCEPTION); }
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
@@ -143,8 +146,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
-                if (stopwatch.ElapsedMilliseconds > Settings.PrimaryReadTimeout) { throw new SecondartReadTimeoutException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(SECONDARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
+                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { throw new TimeoutException(SECONDARY_READ_TIMEOUT_EXCEPTION); }
 
                 if (ReadResult.Buffer.Length < bytesToRead)
                 {
@@ -178,8 +181,8 @@ namespace Toolbox.Connection
             stopwatch.Start();
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested) { throw new CancelSecondaryReadException(); }
-                //if (stopwatch.ElapsedMilliseconds > Settings.ReceiveTimeoutInner) { throw new ReadTimeoutInnerException(); }
+                if (cancellationToken.IsCancellationRequested) { throw new OperationCanceledException(SECONDARY_READ_CANCELLATION_EXCEPTION, cancellationToken); }
+                if (stopwatch.ElapsedMilliseconds > Settings.SecondaryReadTimeout) { throw new TimeoutException(SECONDARY_READ_TIMEOUT_EXCEPTION); }
 
                 int endOfTextIndex = Array.FindIndex(ReadResult.Buffer.ToArray(), (x) => x == endOfText);
                 if (endOfTextIndex < 0)
@@ -243,8 +246,8 @@ namespace Toolbox.Connection
             }
             catch (Exception ex)
             {
-                //TODO:Log.Exception(ex);
-                throw ex;
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return result;
         }
@@ -276,7 +279,7 @@ namespace Toolbox.Connection
                     }
                     catch (Exception ex)
                     {
-                        //TODO:Log.Exception(ex);
+                        Log?.LogError(ex, ex.Message);
                         break;
                     }
                 }
