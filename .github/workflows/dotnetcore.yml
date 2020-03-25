@@ -26,6 +26,6 @@ jobs:
     - name: Build
       run: dotnet build ./src/BinaryBox.sln --configuration Release --no-restore
     # - name: Test
-    #   run: dotnet test --no-build --configuration Release
+    #   run: dotnet test ./src/BinaryBox.sln --no-build --configuration Release
     - name: Pack
-      run: dotnet pack --no-build --configuration Release
+      run: dotnet pack ./src/BinaryBox.sln --no-build --configuration Release
