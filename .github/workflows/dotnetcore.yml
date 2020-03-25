@@ -1,0 +1,31 @@
+name: .NET Core
+
+on:
+  push:
+    branches:
+    - master
+    - feature/*
+
+  pull_request:
+    branches:
+    - develop
+
+jobs:
+  build:
+    name: Build Binary Box
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore ./src/BinaryBox.sln
+    - name: Build
+      run: dotnet build ./src/BinaryBox.sln --configuration Release --no-restore
+    # - name: Test
+    #   run: dotnet test ./src/BinaryBox.sln --no-build --configuration Release
+    - name: Pack
+      run: dotnet pack ./src/BinaryBox.sln --no-build --configuration Release
