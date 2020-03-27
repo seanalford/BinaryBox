@@ -22,7 +22,7 @@ namespace BinaryBox.Connection.Test
 
             public async Task<bool> ConnectAsync(int delay, bool result)
             {
-                await Task.Delay(delay);
+                await Task.Delay(delay).ConfigureAwait(false);
                 return result;
             }
 
@@ -35,12 +35,12 @@ namespace BinaryBox.Connection.Test
                         return RxBuffer.Length > 0;
 
                     }
-                });
+                }).ConfigureAwait(false); ;
             }
 
             public async Task<bool> DisconnectAsync(int delay, bool result)
             {
-                await Task.Delay(delay);
+                await Task.Delay(delay).ConfigureAwait(false);
                 return result;
             }
 
@@ -53,8 +53,7 @@ namespace BinaryBox.Connection.Test
                     {
                         if (!WriteToRxBufferRunning) break;
                     }
-
-                }).Wait();
+                }).ConfigureAwait(false).GetAwaiter().GetResult();
             }
 
             public async Task<int> ReadAsync(byte[] data, CancellationToken cancellationToken)
@@ -73,7 +72,7 @@ namespace BinaryBox.Connection.Test
                     }
                     if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException();
                     return bytesRead;
-                });
+                }).ConfigureAwait(false);
             }
 
             public async Task WriteToInputRxBuffer(byte[] data, int delayPerByte = 0)
@@ -93,7 +92,7 @@ namespace BinaryBox.Connection.Test
                             }
                         }
                     }
-                });
+                }).ConfigureAwait(false);
             }
 
             private void WriteToRxBuffer()
@@ -109,7 +108,7 @@ namespace BinaryBox.Connection.Test
                             {
                                 for (int i = 0; i < InputRxBuffer.Length; i++)
                                 {
-                                    await Task.Delay(InputRxBufferDelay);
+                                    await Task.Delay(InputRxBufferDelay).ConfigureAwait(false);
                                     lock (InputRxBuffer)
                                     {
                                         lock (RxBuffer)
@@ -138,7 +137,7 @@ namespace BinaryBox.Connection.Test
                     data.CopyTo(TxBuffer, 0);
                     if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException();
                     return true;
-                });
+                }).ConfigureAwait(false);
             }
 
 

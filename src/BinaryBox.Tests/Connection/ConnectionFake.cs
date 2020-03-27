@@ -19,7 +19,7 @@ namespace BinaryBox.Connection.Test
 
             public override async Task<bool> DataAvailableAsync()
             {
-                return await Host.DataAvaliable();
+                return await Host.DataAvaliable().ConfigureAwait(false);
             }
 
             public override void Dispose()
@@ -29,27 +29,27 @@ namespace BinaryBox.Connection.Test
 
             protected async override Task<bool> ConnectTask()
             {
-                return await Host.ConnectAsync(TaskDelay, ExpectedResult);
+                return await Host.ConnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
             }
 
             protected async override Task<bool> DisconnectTask()
             {
-                return await Host.DisconnectAsync(TaskDelay, ExpectedResult);
+                return await Host.DisconnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
             }
 
             protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
             {
-                return await Host.ReadAsync(data, cancellationToken);
+                return await Host.ReadAsync(data, cancellationToken).ConfigureAwait(false);
             }
 
             protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
             {
-                return await Host.WriteAsync(data, cancellationToken);
+                return await Host.WriteAsync(data, cancellationToken).ConfigureAwait(false);
             }
 
             public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0)
             {
-                await Host.WriteToInputRxBuffer(data, delayPerByte);
+                await Host.WriteToInputRxBuffer(data, delayPerByte).ConfigureAwait(false);
             }
 
         }
