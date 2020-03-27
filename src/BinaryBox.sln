@@ -18,11 +18,20 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{8AC9A536-23CE-4181-B9A4-29FAB005E428}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
+		..\BinaryBox.svg = ..\BinaryBox.svg
+		..\BinaryBox2.svg = ..\BinaryBox2.svg
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Connection.TcpTests", "BinaryBox.Connection.TcpTests\BinaryBox.Connection.TcpTests.csproj", "{398ED87E-D7D4-4627-9E9B-CD7402E2F2F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F5D0DA03-4134-4422-B41C-0126E3E7EE1E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{1E140B8C-E142-436A-8F9C-4881BFDE3E4E}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\dotnetcore.yml = ..\.github\workflows\dotnetcore.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +69,7 @@ Global
 		{C3E441B2-ADC5-461D-A725-887DBA689B89} = {9AD0C034-EDD3-462A-8631-16679592059A}
 		{8EDABE24-355E-4CA8-B00A-B58F6B17E848} = {A11ECCCF-9BF0-4014-9F5A-64110AA7414A}
 		{398ED87E-D7D4-4627-9E9B-CD7402E2F2F8} = {9AD0C034-EDD3-462A-8631-16679592059A}
+		{1E140B8C-E142-436A-8F9C-4881BFDE3E4E} = {F5D0DA03-4134-4422-B41C-0126E3E7EE1E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {28858F84-FF07-48BA-B32E-D397943590E5}

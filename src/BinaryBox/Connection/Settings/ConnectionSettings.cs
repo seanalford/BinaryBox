@@ -5,8 +5,8 @@ namespace BinaryBox.Connection
     public class ConnectionSettings : IConnectionSettings, INotifyPropertyChanged
     {
         public const int DEFAULT_READ_BUFFER_SIZE = 1024;
-        public const int DEFAULT_PRIMARY_READ_TIMEOUT = 1000;
-        public const int DEFAULT_SECONDARY_READ_TIMEOUT = 15000;
+        public const int DEFAULT_PRIMARY_READ_TIMEOUT = 15000;
+        public const int DEFAULT_SECONDARY_READ_TIMEOUT = 1000;
         public const int DEFAULT_WRITE_BUFFER_SIZE = 1024;
         public const int DEFAULT_WRITE_TIMEOUT = 15000;
 

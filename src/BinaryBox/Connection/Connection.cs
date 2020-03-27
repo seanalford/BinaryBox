@@ -101,7 +101,7 @@ namespace BinaryBox.Connection
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadBytesAsyncInner(bytesToRead, cancellationToken).ConfigureAwait(false);
+                    result = await ReadBytesAsyncSecondary(bytesToRead, cancellationToken).ConfigureAwait(false);
                 }
                 if (result?.Length == bytesToRead) break;
             }
@@ -131,14 +131,14 @@ namespace BinaryBox.Connection
 
                 if (Pipe.Reader.TryRead(out ReadResult))
                 {
-                    result = await ReadEndOfTextAsyncInner(endOfText, cancellationToken, checksumLength).ConfigureAwait(false);
+                    result = await ReadEndOfTextAsyncSecondary(endOfText, cancellationToken, checksumLength).ConfigureAwait(false);
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
             }
             return result;
         }
 
-        private async Task<byte[]> ReadBytesAsyncInner(int bytesToRead, CancellationToken cancellationToken)
+        private async Task<byte[]> ReadBytesAsyncSecondary(int bytesToRead, CancellationToken cancellationToken)
         {
             byte[] result = new byte[0];
 
@@ -155,7 +155,7 @@ namespace BinaryBox.Connection
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
                     Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
-                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                    Pipe.Reader.TryRead(out ReadResult);
                     if (ReadResult.Buffer.Length > 0)
                     {
                         stopwatch.Restart();
@@ -173,7 +173,7 @@ namespace BinaryBox.Connection
             return result;
         }
 
-        private async Task<byte[]> ReadEndOfTextAsyncInner(byte endOfText, CancellationToken cancellationToken, int checksumLength = 0)
+        private async Task<byte[]> ReadEndOfTextAsyncSecondary(byte endOfText, CancellationToken cancellationToken, int checksumLength = 0)
         {
             byte[] result = new byte[0];
 
@@ -191,7 +191,7 @@ namespace BinaryBox.Connection
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
                     Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
-                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                    Pipe.Reader.TryRead(out ReadResult);
                     if (ReadResult.Buffer.Length > 0)
                     {
                         stopwatch.Restart();
@@ -203,7 +203,7 @@ namespace BinaryBox.Connection
                     Array.Resize(ref result, result.Length + bytesToConsume);
                     ReadResult.Buffer.Slice(0, bytesToConsume).ToArray().CopyTo(result, result.Length - bytesToConsume);
                     Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(bytesToConsume));
-                    await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                    Pipe.Reader.TryRead(out ReadResult);
                 }
                 if (Array.FindIndex(result, (x) => x == endOfText) >= 0) break;
             }
@@ -214,14 +214,13 @@ namespace BinaryBox.Connection
                 {
                     if (checksumLength > ReadResult.Buffer.Length)
                     {
-                        await Task.Run(() => Pipe.Reader.TryRead(out ReadResult));
+                        Pipe.Reader.TryRead(out ReadResult);
                         Pipe.Reader.AdvanceTo(ReadResult.Buffer.Start);
                     }
                     else
                     {
                         Array.Resize(ref result, result.Length + checksumLength);
                         ReadResult.Buffer.Slice(0, checksumLength).ToArray().CopyTo(result, result.Length - checksumLength);
-                        //Pipe.Reader.AdvanceTo(ReadResult.Buffer.GetPosition(checksumLength));
                         break;
                     }
                 }
@@ -258,7 +257,7 @@ namespace BinaryBox.Connection
             if (Pipe == null)
             {
                 Pipe = new Pipe();
-                Task.Run(() => FillPipe(cancellationToken));
+                FillPipe(cancellationToken);
             }
         }
 
