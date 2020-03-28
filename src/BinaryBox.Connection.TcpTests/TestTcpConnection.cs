@@ -5,7 +5,7 @@ using Xunit;
 
 namespace BinaryBox.Connection.Tcp.Tests
 {
-    public class TcpConnectionTests
+    public class TestTcpConnection
     {
         TcpListener Server = null;
 
@@ -22,7 +22,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 777, ConnectionState.Connected)]
+        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
         public async void TestDefaultConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange            
@@ -40,7 +40,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 777, ConnectionState.Connected)]
+        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
         public async void TestConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange            
@@ -58,7 +58,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 777, ConnectionState.Connected)]
+        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
         public async void TestConnectAsyncWithCustomSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange
@@ -75,7 +75,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 777, ConnectionState.Disconnected)]
+        [InlineData("127.0.0.1", 7777, ConnectionState.Disconnected)]
         public async void TestDisconnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange            
@@ -93,7 +93,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 777, ConnectionState.Disconnected)]
+        [InlineData("127.0.0.1", 7777, ConnectionState.Disconnected)]
         public async void TestDisconnectAsyncWithCustomSettings(string host, int port, ConnectionState expectedResult)
         {
             // Arange
