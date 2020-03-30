@@ -352,29 +352,28 @@ namespace BinaryBox.Connection.Test
         }
 
         [Theory()]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, false, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 })]
-        [InlineData(Checksum.ChecksumTypes.LRC, true, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
-        public async Task TestConnectionReadAsyncEndOfTextX1WithNoDelay(ChecksumTypes checksum, bool includeChecksum, byte[] rxMessage, byte endOfText, byte[] expectedResult)
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.None, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)7, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)1, new byte[] { 1, 2 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)2, new byte[] { 1, 2, 3 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)3, new byte[] { 1, 2, 3, 4 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)4, new byte[] { 1, 2, 3, 4, 5 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)5, new byte[] { 1, 2, 3, 4, 5, 6 })]
+        [InlineData(Checksum.ChecksumTypes.LRC, new byte[] { 1, 2, 3, 4, 5, 6, 7 }, (byte)6, new byte[] { 1, 2, 3, 4, 5, 6, 7 })]
+        public async Task TestConnectionReadAsyncEndOfTextX1WithNoDelay(ChecksumTypes checksum, byte[] rxMessage, byte endOfText, byte[] expectedResult)
         {
             // Arrange        
             using (ConnectionFake connection = new ConnectionFake(null, DefaultConnectionSettings()))
             {
-                int checksumLength = (includeChecksum == true) ? checksum.Length() : 0;
                 await connection.WriteToRxBuffer(rxMessage);
 
                 // Act
-                var result = await connection.ReadAsync(endOfText, CancellationToken.None, checksumLength);
+                var result = await connection.ReadAsync(endOfText, CancellationToken.None, checksum.Length());
 
                 // Assert    
                 result.Should().BeEquivalentTo(expectedResult);
