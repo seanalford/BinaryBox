@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		..\.github\workflows\dotnetcore.yml = ..\.github\workflows\dotnetcore.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryBox.Protocol.Modbus", "BinaryBox.Protocol.Modbus\BinaryBox.Protocol.Modbus.csproj", "{180B8CB7-911E-475B-A784-4362F0D15E54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBox.Protocol.Modbus", "BinaryBox.Protocol.Modbus\BinaryBox.Protocol.Modbus.csproj", "{180B8CB7-911E-475B-A784-4362F0D15E54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
