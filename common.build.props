@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <Copyright>Copyright Sean Alford © $([System.DateTime]::Now.ToString('yyyy'))</Copyright>
+        <Authors>Sean Alford, Contributors</Authors>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- <PackageIcon>images/packageicon.png</PackageIcon> -->
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)/LICENSE" Pack="true" PackagePath="/" Visible="false" />
+    </ItemGroup>
+</Project>
