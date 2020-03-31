@@ -5,7 +5,6 @@ on:
     branches:
     - master
     - develop
-    - feature/*
 
   pull_request:
     branches:
@@ -22,11 +21,11 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-    - name: Install dependencies
+    - name: Restore
       run: dotnet restore ./src/BinaryBox.sln
     - name: Build
       run: dotnet build ./src/BinaryBox.sln --configuration Release --no-restore
-#    - name: Test
-#      run: dotnet test ./src/BinaryBox.sln --no-build --configuration Release
+    - name: Test
+      run: dotnet test ./src/BinaryBox.sln --no-build --configuration Release
     - name: Pack
       run: dotnet pack ./src/BinaryBox.sln --no-build --configuration Release
