@@ -1,4 +1,4 @@
-<img src="BinaryBox.svg" height="100" > <img src="BinaryBox2.svg" height="100" > 
+<img src="BinaryBox.svg" height="100" > <img src="BinaryBox2.svg" height="100" > <img src="BinaryBox3.svg" height="100" >
 
 ![.NET Core](https://github.com/seanalford/BinaryBox/workflows/.NET%20Core/badge.svg)
 
