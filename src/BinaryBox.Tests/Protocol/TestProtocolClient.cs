@@ -11,12 +11,12 @@ namespace BinaryBox.Protocol.Test
     {
         // Test Tx Retries
         [Theory]
-        [InlineData(ChecksumTypes.None, 1, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 2, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 3, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 4, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 5, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        public async void TestFakeClientSendTxRetiresFailedSend(ChecksumTypes checksum, int sendRetries, ProtocolClientStatusCodes expectedResult)
+        [InlineData(ChecksumTypes.None, 1, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 2, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 3, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 4, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 5, ProtocolClientResults.SendRetryLimitExceeded)]
+        public async void TestFakeClientSendTxRetiresFailedSend(ChecksumTypes checksum, int sendRetries, ProtocolClientResults expectedResult)
         {
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
@@ -30,17 +30,17 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Should().Be(expectedResult);
+            result.Result.Should().Be(expectedResult);
         }
 
         // Test Tx Retries
         [Theory]
-        [InlineData(ChecksumTypes.None, 1, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 2, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 3, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 4, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 5, ProtocolClientStatusCodes.SendRetryLimitExceeded)]
-        public async void TestFakeClientSendTxRetiresNak(ChecksumTypes checksum, int sendRetries, ProtocolClientStatusCodes expectedResult)
+        [InlineData(ChecksumTypes.None, 1, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 2, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 3, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 4, ProtocolClientResults.SendRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 5, ProtocolClientResults.SendRetryLimitExceeded)]
+        public async void TestFakeClientSendTxRetiresNak(ChecksumTypes checksum, int sendRetries, ProtocolClientResults expectedResult)
         {
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
@@ -55,17 +55,17 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Should().Be(expectedResult);
+            result.Result.Should().Be(expectedResult);
         }
 
         // Test Rx Retries
         [Theory]
-        [InlineData(ChecksumTypes.None, 1, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 2, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 3, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 4, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 5, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        public async void TestFakeClientSendRxRetiresNoData(ChecksumTypes checksum, int receiveRetries, ProtocolClientStatusCodes expectedResult)
+        [InlineData(ChecksumTypes.None, 1, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 2, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 3, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 4, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 5, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        public async void TestFakeClientSendRxRetiresNoData(ChecksumTypes checksum, int receiveRetries, ProtocolClientResults expectedResult)
         {
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
@@ -82,17 +82,17 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Should().Be(expectedResult); //.BeOfType<ReceiveRetryLimitExceededException>();
+            result.Result.Should().Be(expectedResult); //.BeOfType<ReceiveRetryLimitExceededException>();
         }
 
         // Test Rx Retries
         [Theory]
-        [InlineData(ChecksumTypes.None, 1, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 2, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 3, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 4, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        [InlineData(ChecksumTypes.None, 5, ProtocolClientStatusCodes.ReceiveRetryLimitExceeded)]
-        public async void TestFakeClientSendRxRetiresWithData(ChecksumTypes checksum, int receiveRetries, ProtocolClientStatusCodes expectedResult)
+        [InlineData(ChecksumTypes.None, 1, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 2, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 3, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 4, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        [InlineData(ChecksumTypes.None, 5, ProtocolClientResults.ReceiveRetryLimitExceeded)]
+        public async void TestFakeClientSendRxRetiresWithData(ChecksumTypes checksum, int receiveRetries, ProtocolClientResults expectedResult)
         {
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
@@ -108,13 +108,13 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Should().Be(expectedResult);
+            result.Result.Should().Be(expectedResult);
         }
 
         [Theory]                                                                        // [STX][MSGT]  [Item 0-FFFF ]  [IEEE Float                  ][ETX]              
-        [InlineData(ProtocolClientStatusCodes.OK, 1, 0, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
-        [InlineData(ProtocolClientStatusCodes.OK, 2, 1, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 50, 51, 70, 56, 48, 48, 48, 48, 48, 3 })]
-        public async void TestFakeClientSendValid(ProtocolClientStatusCodes expectedStatus, int expectedItem, float expectedValue, ChecksumTypes checksum, byte[] rxMessage)
+        [InlineData(ProtocolClientResults.OK, 1, 0, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
+        [InlineData(ProtocolClientResults.OK, 2, 1, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 50, 51, 70, 56, 48, 48, 48, 48, 48, 3 })]
+        public async void TestFakeClientSendValid(ProtocolClientResults expectedStatus, int expectedItem, float expectedValue, ChecksumTypes checksum, byte[] rxMessage)
         {
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
@@ -132,14 +132,14 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, CancellationToken.None);
 
             // Arrange
-            result.Status.Should().Be(expectedStatus);
+            result.Result.Should().Be(expectedStatus);
             message.Data.Item.Should().Be(expectedItem);
             message.Data.Value.Should().Be(expectedValue);
         }
 
         [Theory]
-        [InlineData(ProtocolClientStatusCodes.OK, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
-        public async void TestFakeClientSendValidNoTxValidate(ProtocolClientStatusCodes expectedStatus, ChecksumTypes checksum, byte[] rxMessage)
+        [InlineData(ProtocolClientResults.OK, ChecksumTypes.None, new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 })]
+        public async void TestFakeClientSendValidNoTxValidate(ProtocolClientResults expectedStatus, ChecksumTypes checksum, byte[] rxMessage)
         {
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
@@ -154,7 +154,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, CancellationToken.None);
 
             // Arrange
-            result.Status.Should().Be(expectedStatus);
+            result.Result.Should().Be(expectedStatus);
         }
     }
 }
