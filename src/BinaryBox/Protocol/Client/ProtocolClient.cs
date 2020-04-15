@@ -12,9 +12,9 @@ namespace BinaryBox.Protocol
         where TMessage : IProtocolMessage<TProtocolSettings>
     {
         public IConnection Connection { get; protected set; }
-        public IProtocolSettings Settings { get; protected set; }
+        public TProtocolSettings Settings { get; protected set; }
 
-        public ProtocolClient(ILogger logger, IConnection connection, IProtocolSettings settings) : base(logger)
+        public ProtocolClient(ILogger logger, IConnection connection, TProtocolSettings settings) : base(logger)
         {
             Connection = connection;
             Settings = settings;
