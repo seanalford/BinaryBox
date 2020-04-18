@@ -39,7 +39,7 @@ namespace BinaryBox.Connection
             try
             {
                 bool state = await ConnectTask().ConfigureAwait(false);
-                State = state == true ? ConnectionState.Connected : ConnectionState.Disconnected;
+                State = state ? ConnectionState.Connected : ConnectionState.Disconnected;
             }
             catch (Exception ex)
             {
@@ -67,7 +67,7 @@ namespace BinaryBox.Connection
             try
             {
                 bool state = await DisconnectTask().ConfigureAwait(false);
-                State = state == true ? ConnectionState.Disconnected : ConnectionState.Connected;
+                State = state ? ConnectionState.Disconnected : ConnectionState.Connected;
             }
             catch (Exception ex)
             {
@@ -295,6 +295,5 @@ namespace BinaryBox.Connection
             // Tell the PipeReader that there's no more data coming
             Pipe.Writer.Complete();
         }
-
     }
 }

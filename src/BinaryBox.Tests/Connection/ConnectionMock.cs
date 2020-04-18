@@ -6,45 +6,34 @@ namespace BinaryBox.Connection.Test
 {
     public class ConnectionMock : Connection
     {
-        public IDummyClient Client { get; }
+        private readonly IClientStub _client;
 
-        public ConnectionMock(IDummyClient client, ILogger logger, IConnectionSettings settings) : base(logger, settings)
+        public ConnectionMock(IClientStub client, ILogger logger, IConnectionSettings settings)
+            : base(logger, settings)
         {
-            Client = client;
+            _client = client;
         }
 
-        protected override Task<bool> ConnectTask() => Client.Return<bool>();
+        /// <inheritdoc />
+        protected override Task<bool> ConnectTask() => _client.Result<bool>();
 
-        public override Task<bool> DataAvailableAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        /// <inheritdoc />
+        public override Task<bool> DataAvailableAsync() => _client.Result<bool>();
 
-        protected override Task<bool> DisconnectTask()
-        {
-            throw new System.NotImplementedException();
-        }
+        /// <inheritdoc />
+        protected override Task<bool> DisconnectTask() => _client.Result<bool>();
 
+        /// <inheritdoc />
         public override void Dispose()
         {
-            throw new System.NotImplementedException();
         }
 
-        protected override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
-        {
-            throw new System.NotImplementedException();
-        }
+        /// <inheritdoc />
+        protected override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken) =>
+            _client.Result<int>();
 
-        protected override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
-
-    public interface IDummyClient
-    {
-        Task Return();
-
-        Task<T> Return<T>();
+        /// <inheritdoc />
+        protected override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken) =>
+            _client.Result<bool>();
     }
 }
