@@ -3,6 +3,8 @@ using BinaryBox.Connection;
 using FluentAssertions;
 using NSubstitute;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace BinaryBox.Protocol.Test
@@ -155,6 +157,26 @@ namespace BinaryBox.Protocol.Test
 
             // Arrange
             result.Result.Should().Be(expectedStatus);
+        }
+
+        [Theory]
+        [InlineData(ConnectionState.Connecting)]
+        [InlineData(ConnectionState.Disconnected)]
+        [InlineData(ConnectionState.Disconnecting)]
+        public async Task ProtocolClientShouldReturnConnectionNotAvailable(ConnectionState state)
+        {
+            var logger = Substitute.For<ILogger>();
+            var connection = Substitute.For<IConnection>();
+            var setting = Substitute.For<IFakeProtocolSettings>();
+            connection.State.Returns(state);
+            var protocol = new FakeClient(logger, connection, setting);
+
+            // Act
+            var result = await protocol.SendAsync(new FakeProtocolMessageGet(logger, setting), CancellationToken.None);
+
+            // Assert
+            result.Should().BeAssignableTo<ProtocolClientResult>();
+            result.Result.Should().Be(ProtocolClientResults.ConnectionNotAvailable);
         }
     }
 }

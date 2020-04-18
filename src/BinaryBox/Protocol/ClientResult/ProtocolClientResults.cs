@@ -1,4 +1,4 @@
 ﻿namespace BinaryBox.Protocol
 {
-    public enum ProtocolClientResults { OK, SendRetryLimitExceeded, ReceiveRetryLimitExceeded, }
+    public enum ProtocolClientResults { OK, ConnectionNotAvailable, SendRetryLimitExceeded, ReceiveRetryLimitExceeded, }
 }

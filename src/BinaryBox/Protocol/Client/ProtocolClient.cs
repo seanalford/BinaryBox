@@ -30,6 +30,12 @@ namespace BinaryBox.Protocol
         {
             message.ClearData();
 
+            if (Connection.State != ConnectionState.Connected)
+            {
+                return new ProtocolClientResult(ProtocolClientResults.ConnectionNotAvailable);
+            }
+
+            // Do Work
             var result = await Tx(message, cancellationToken);
 
             if (result.Result == ProtocolClientResults.OK)

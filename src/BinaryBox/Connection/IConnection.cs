@@ -8,6 +8,7 @@ namespace BinaryBox.Connection
     public interface IConnection : IDisposable
     {
         ILogger Log { get; }
+
         IConnectionSettings Settings { get; set; }
 
         ConnectionState State { get; }
