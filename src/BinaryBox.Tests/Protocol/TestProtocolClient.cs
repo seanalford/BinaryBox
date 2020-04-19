@@ -23,6 +23,7 @@ namespace BinaryBox.Protocol.Test
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, SendRetries = sendRetries };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
@@ -47,6 +48,7 @@ namespace BinaryBox.Protocol.Test
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, SendRetries = sendRetries };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
@@ -72,6 +74,7 @@ namespace BinaryBox.Protocol.Test
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, ReceiveRetries = receiveRetries };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
@@ -99,6 +102,7 @@ namespace BinaryBox.Protocol.Test
             // Arrange                 
             CancellationToken cancellationToken = new CancellationToken();
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum, ReceiveRetries = receiveRetries };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(1);
@@ -120,6 +124,7 @@ namespace BinaryBox.Protocol.Test
         {
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Get(LoggerFactory.Build(), settings).Item(expectedItem);
@@ -145,6 +150,7 @@ namespace BinaryBox.Protocol.Test
         {
             // Arrange                        
             IConnection connection = Substitute.For<IConnection>();
+            connection.State.Returns(ConnectionState.Connected);
             IFakeProtocolSettings settings = new FakeProtocolSettings() { Checksum = checksum };
             var client = new FakeClient(LoggerFactory.Build(), connection, settings);
             var message = FakeProtocol.Set(LoggerFactory.Build(), settings);
