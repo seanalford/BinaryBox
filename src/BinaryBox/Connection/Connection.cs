@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
 using System.ComponentModel;
@@ -15,12 +15,15 @@ namespace BinaryBox.Connection
         public const string SECONDARY_READ_CANCELLATION_EXCEPTION = "Secondary Read Cancellation Exception";
         public const string PRIMARY_READ_TIMEOUT_EXCEPTION = "Primary Read Timeout Exception";
         public const string SECONDARY_READ_TIMEOUT_EXCEPTION = "Secondary Read Timeout Exception";
+        private ReadResult ReadResult;
 
         private Pipe Pipe = null;
         public event PropertyChangedEventHandler PropertyChanged;
-        private ReadResult ReadResult;
+        
         public ILogger Log { get; private set; }
+
         public IConnectionSettings Settings { get; set; }
+
         public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
 
         public Connection(ILogger logger, IConnectionSettings settings)

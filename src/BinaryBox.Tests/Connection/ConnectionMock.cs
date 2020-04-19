@@ -8,6 +8,7 @@ namespace BinaryBox.Connection.Test
     {
         private readonly IClientStub _client;
 
+        /// <inheritdoc />
         public ConnectionMock(IClientStub client, ILogger logger, IConnectionSettings settings)
             : base(logger, settings)
         {

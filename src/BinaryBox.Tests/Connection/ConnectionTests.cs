@@ -107,7 +107,7 @@ namespace BinaryBox.Connection.Test
 
         public class TheReadAsyncMethod
         {
-            // TODO: This shows there is some flaw in the read as the call fires and never finishes.
+            // TODO: This test does not return correctly.  The read as the call fires and never finishes.
             // [Fact]
             public async Task ShouldCallReadTask()
             {
@@ -118,6 +118,70 @@ namespace BinaryBox.Connection.Test
 
                 // Act
                 await connection.ReadAsync(5, CancellationToken.None);
+
+                // Assert
+                await client.Received().Result<int>();
+            }
+        }
+
+        public class TheWriteAsyncMethod
+        {
+            [Fact]
+            public async Task ShouldCallWriteTask()
+            {
+                // Arrange
+                var client = Substitute.For<IClientStub>();
+                client.Result<bool>().Returns(Task.FromResult(true));
+                ConnectionMock connection = new ConnectionMockFixture().WithClient(client);
+
+                // Act
+                await connection.WriteAsync(new byte[]{ }, CancellationToken.None);
+
+                // Assert
+                await client.Received().Result<bool>();
+            }
+
+            [Fact]
+            public async Task ShouldCallReturnTrue()
+            {
+                // Arrange
+                var client = Substitute.For<IClientStub>();
+                client.Result<bool>().Returns(Task.FromResult(true));
+                ConnectionMock connection = new ConnectionMockFixture().WithClient(client);
+
+                // Act
+                var result = await connection.WriteAsync(new byte[]{ }, CancellationToken.None);
+
+                // Assert
+                result.Should().BeTrue();
+            }
+
+            [Fact]
+            public async Task ShouldCallReturnFalse()
+            {
+                // Arrange
+                var client = Substitute.For<IClientStub>();
+                client.Result<bool>().Returns(Task.FromResult(false));
+                ConnectionMock connection = new ConnectionMockFixture().WithClient(client);
+
+                // Act
+                var result = await connection.WriteAsync(new byte[]{ }, CancellationToken.None);
+
+                // Assert
+                result.Should().BeFalse();
+            }
+        }
+
+        public class TheDataAvailableAsyncMethod
+        {
+            // TODO: This test does not return correctly.  The read call fires and never finishes.
+            [Fact]
+            public async Task ShouldCallReadTask()
+            {
+                // Arrange
+                var client = Substitute.For<IClientStub>();
+                client.Result<bool>().Returns(Task.FromResult(true));
+                ConnectionMock connection = new ConnectionMockFixture().WithClient(client);
 
                 // Assert
                 await client.Received().Result<int>();

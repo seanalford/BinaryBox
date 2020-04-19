@@ -27,31 +27,21 @@ namespace BinaryBox.Connection.Test
                 Host.Dispose();
             }
 
-            protected async override Task<bool> ConnectTask()
-            {
-                return await Host.ConnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
-            }
+            /// <inheritdoc />
+            protected override async Task<bool> ConnectTask() =>
+                await Host.ConnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
 
-            protected async override Task<bool> DisconnectTask()
-            {
-                return await Host.DisconnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
-            }
+            protected override async Task<bool> DisconnectTask() =>
+                await Host.DisconnectAsync(TaskDelay, ExpectedResult).ConfigureAwait(false);
 
-            protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
-            {
-                return await Host.ReadAsync(data, cancellationToken).ConfigureAwait(false);
-            }
+            protected override async Task<int> ReadTask(byte[] data, CancellationToken cancellationToken) =>
+                await Host.ReadAsync(data, cancellationToken).ConfigureAwait(false);
 
-            protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
-            {
-                return await Host.WriteAsync(data, cancellationToken).ConfigureAwait(false);
-            }
+            protected override async Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken) =>
+                await Host.WriteAsync(data, cancellationToken).ConfigureAwait(false);
 
-            public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0)
-            {
+            public async Task WriteToRxBuffer(byte[] data, int delayPerByte = 0) =>
                 await Host.WriteToInputRxBuffer(data, delayPerByte).ConfigureAwait(false);
-            }
-
         }
     }
 }
