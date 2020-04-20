@@ -1,14 +1,16 @@
 ﻿namespace BinaryBox.Protocol
 {
-    public class ProtocolClientResult : IProtocolClientResult
+    public class ProtocolClientResult<TProtocolMessageData> : IProtocolClientResult<TProtocolMessageData>
+        where TProtocolMessageData : IProtocolMessageData
     {
-        public ProtocolClientResults Result { get; }
+        public ProtocolClientStatus Status { get; }
         public string Description { get; }
+        public TProtocolMessageData Data { get; }
 
-        public ProtocolClientResult(ProtocolClientResults code)
+        public ProtocolClientResult(ProtocolClientStatus result, TProtocolMessageData data = default)
         {
-            Result = code;
-
+            Status = result;
+            Data = data;
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿namespace BinaryBox.Protocol.Test
 {
-    public interface IFakeProtocolMessage<TProtocolSettings> : IProtocolMessage<TProtocolSettings>
+    public interface IFakeProtocolMessage<TProtocolSettings, TProtocolMessageData> : IProtocolMessage<TProtocolSettings, TProtocolMessageData>
         where TProtocolSettings : IProtocolSettings
+        where TProtocolMessageData : IProtocolMessageData
     {
 
     }

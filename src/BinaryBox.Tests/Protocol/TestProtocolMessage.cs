@@ -19,12 +19,11 @@ namespace BinaryBox.Protocol.Test
     public class TestProtocolMessage
     {
 
-
         [Fact]
         public void TestDefaultProtocolMessage()
         {
             // Arrange / Act            
-            IProtocolMessage<IFakeProtocolSettings> protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings());
+            IProtocolMessage<IFakeProtocolSettings, IFakeProtocolMessageData> protocolMessage = new FakeProtocolMessageGet(LoggerFactory.Build(), new FakeProtocolSettings());
 
             //// Assert
             protocolMessage.Abort.Should().BeEquivalentTo(BitConverter.GetBytes(MessageTokens.ESC));

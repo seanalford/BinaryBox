@@ -2,8 +2,9 @@
 
 namespace BinaryBox.Protocol
 {
-    public abstract class ProtocolMessage<TProtocolSettings> : Protocol, IProtocolMessage<TProtocolSettings>
+    public abstract class ProtocolMessage<TProtocolSettings, TProtocolMessageData> : Protocol, IProtocolMessage<TProtocolSettings, TProtocolMessageData>
         where TProtocolSettings : IProtocolSettings
+        where TProtocolMessageData : IProtocolMessageData
     {
         public ProtocolMessage(ILogger logger, TProtocolSettings settings) : base(logger)
         {
@@ -17,7 +18,7 @@ namespace BinaryBox.Protocol
 
         public bool Complete { get; protected set; }
 
-        public IProtocolMessageData Data { get; protected set; }
+        public TProtocolMessageData Data { get; protected set; }
 
         public abstract bool Decode(byte[] data);
 

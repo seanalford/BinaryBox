@@ -1,8 +1,9 @@
 ﻿namespace BinaryBox.Protocol
 {
-    public interface IProtocolClientResult
+    public interface IProtocolClientResult<TProtocolMessageData>
     {
-        ProtocolClientResults Result { get; }
+        ProtocolClientStatus Status { get; }
         string Description { get; }
+        TProtocolMessageData Data { get; }
     }
 }

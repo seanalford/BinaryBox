@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BinaryBox.Protocol.Test
 {
-    public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings>, IFakeProtocolMessage<IFakeProtocolSettings>
+    public abstract class FakeProtocolMessage : ProtocolMessage<IFakeProtocolSettings, IFakeProtocolMessageData>, IFakeProtocolMessage<IFakeProtocolSettings, IFakeProtocolMessageData>
     {
         protected FakeProtcolMessageTypes _Type;
         protected int _Item;

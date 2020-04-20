@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 
 namespace BinaryBox.Protocol
 {
-    public interface IProtocolClient<TProtocolSettings, TMessage> : IProtocol
+    public interface IProtocolClient<TProtocolSettings, TProtocolMessage, TProtocolMessageData> : IProtocol
         where TProtocolSettings : IProtocolSettings
-        where TMessage : IProtocolMessage<TProtocolSettings>
+        where TProtocolMessage : IProtocolMessage<TProtocolSettings, TProtocolMessageData>
+        where TProtocolMessageData : IProtocolMessageData
     {
         IConnection Connection { get; }
-        Task<IProtocolClientResult> SendAsync(TMessage message, CancellationToken cancellationToken);
+        Task<IProtocolClientResult<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken);
     }
 }

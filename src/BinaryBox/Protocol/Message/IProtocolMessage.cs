@@ -1,13 +1,14 @@
 ﻿namespace BinaryBox.Protocol
 {
-    public interface IProtocolMessage<TProtocolSettings> : IProtocol
+    public interface IProtocolMessage<TProtocolSettings, TProtocolMessageData> : IProtocol
         where TProtocolSettings : IProtocolSettings
+        where TProtocolMessageData : IProtocolMessageData
     {
         byte[] Abort { get; }
         byte[] Ack { get; }
         void ClearData();
         bool Complete { get; }
-        IProtocolMessageData Data { get; }
+        TProtocolMessageData Data { get; }
         bool Decode(byte[] data);
         void DecodeData();
         byte[] Encode();
