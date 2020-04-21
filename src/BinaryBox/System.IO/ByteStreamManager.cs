@@ -16,9 +16,11 @@ namespace BinaryBox.Core.System.IO
 
         public ByteStreamState State => _btyeStream.State;
 
-        public ByteStreamManager(IByteStream byteStream)
+        public ByteStreamManager(IByteStream byteStream, IByteStreamSettings settings, ILogger logger = default)
         {
             _btyeStream = byteStream;
+            Settings = settings;
+            Log = logger;
         }
 
         public async Task<ByteStreamManagerResponse<ByteStreamState>> CloseAsync()
@@ -38,7 +40,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
@@ -65,7 +68,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
@@ -92,7 +96,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
@@ -124,7 +129,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
@@ -156,7 +162,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
@@ -188,7 +195,8 @@ namespace BinaryBox.Core.System.IO
                     }
                     catch (Exception ex)
                     {
-                        Log.LogError(ex, ex.Message);
+                        Log?.LogError(ex, ex.Message);
+                        throw;
                     }
                 }
                 finally
