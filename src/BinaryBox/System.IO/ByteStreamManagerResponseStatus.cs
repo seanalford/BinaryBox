@@ -2,18 +2,15 @@
 
 namespace BinaryBox.Core.System.IO
 {
-    public class ByteStreamManagerResponseStatus : IResponseStatus<ByteStreamManagerResponseStatusCode>
+    public class ByteStreamManagerResponseStatus : ResponseStatus<ByteStreamManagerResponseStatusCode>, IResponseStatus<ByteStreamManagerResponseStatusCode>
     {
-        public ByteStreamManagerResponseStatusCode Code { get; }
+        public ByteStreamManagerResponseStatus(ByteStreamManagerResponseStatusCode code) : base(code)
+        {
+        }
 
-        public string Description { get; }
-
-        public bool Success { get; }
-
-        public ByteStreamManagerResponseStatus(ByteStreamManagerResponseStatusCode code)
+        protected override void Initialize()
         {
             //TODO: Move string literals to english resource file.
-            Code = code;
             switch (Code)
             {
                 case ByteStreamManagerResponseStatusCode.OK:

@@ -27,13 +27,13 @@ namespace BinaryBox.Protocol
         /// <param name="message">The TMessage to send to the host.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting messageg status</returns>
-        public async Task<IProtocolClientResult<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken)
+        public async Task<IProtocolResponse<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken)
         {
             message.ClearData();
 
             var result = await Tx(message, cancellationToken);
 
-            if (result.Status == ProtocolClientStatus.OK)
+            if (result.Status.Success)
             {
                 result = await Rx(message, cancellationToken);
             }
@@ -46,9 +46,9 @@ namespace BinaryBox.Protocol
         /// <param name="message">IHexAsciiMessage to send</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns True is if responce is HexAsciiMessageStatus.ACK, otherwise False.</returns>
-        private async Task<IProtocolClientResult<TProtocolMessageData>> Tx(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<IProtocolResponse<TProtocolMessageData>> Tx(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            IProtocolClientResult<TProtocolMessageData> result;
+            IProtocolResponse<TProtocolMessageData> result;
             int retires = 0;
 
             while (true)
@@ -64,13 +64,13 @@ namespace BinaryBox.Protocol
                             // Valid Repsonce?
                             if (message.ValidTx(await TxResult(message, cancellationToken)))
                             {
-                                result = new ProtocolClientResult<TProtocolMessageData>(ProtocolClientStatus.OK);
+                                result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK);
                                 break;
                             }
                         }
                         else
                         {
-                            result = new ProtocolClientResult<TProtocolMessageData>(ProtocolClientStatus.OK);
+                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK);
                             break;
                         }
                     }
@@ -78,12 +78,13 @@ namespace BinaryBox.Protocol
                 catch (Exception ex)
                 {
                     Log?.LogError(ex, ex.Message);
+                    throw;
                 }
 
                 if (retires++ == Settings.SendRetries)
                 {
-                    result = new ProtocolClientResult<TProtocolMessageData>(ProtocolClientStatus.SendRetryLimitExceeded);
-                    Log?.LogInformation(result.Description);
+                    result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.SendRetryLimitExceeded);
+                    Log?.LogInformation(result.Status.Description);
                     break;
                 }
             }
@@ -96,9 +97,9 @@ namespace BinaryBox.Protocol
         /// <param name="message">The IHexAsciiMessage to be received.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>Returns the resulting HexAsciiMessageResult</returns>
-        private async Task<IProtocolClientResult<TProtocolMessageData>> Rx(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<IProtocolResponse<TProtocolMessageData>> Rx(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            IProtocolClientResult<TProtocolMessageData> result;
+            IProtocolResponse<TProtocolMessageData> result;
             int retires = 0;
 
             while (true)
@@ -116,7 +117,7 @@ namespace BinaryBox.Protocol
 
                         if (message.Complete)
                         {
-                            result = new ProtocolClientResult<TProtocolMessageData>(ProtocolClientStatus.OK, message.Data);
+                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK, message.Data);
                             break;
                         }
                     }
@@ -124,8 +125,8 @@ namespace BinaryBox.Protocol
                     {
                         if (retires++ == Settings.ReceiveRetries)
                         {
-                            result = new ProtocolClientResult<TProtocolMessageData>(ProtocolClientStatus.ReceiveRetryLimitExceeded);
-                            Log?.LogInformation(result.Description);
+                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.ReceiveRetryLimitExceeded);
+                            Log?.LogInformation(result.Status.Description);
                             // Send Abort signal to the host?
                             await SendAbort(message, cancellationToken);
                             break;
@@ -139,6 +140,7 @@ namespace BinaryBox.Protocol
                 catch (Exception ex)
                 {
                     Log?.LogError(ex, ex.Message);
+                    throw;
                 }
             }
             return result;
@@ -208,7 +210,8 @@ namespace BinaryBox.Protocol
             }
             catch (Exception ex)
             {
-                //TODO:Log?.Exception(ex);                
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return result;
         }
