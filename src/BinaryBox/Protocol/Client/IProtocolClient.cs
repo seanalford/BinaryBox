@@ -10,6 +10,6 @@ namespace BinaryBox.Protocol
         where TProtocolMessageData : IProtocolMessageData
     {
         IConnection Connection { get; }
-        Task<IProtocolClientResult<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken);
+        Task<IProtocolResponse<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken);
     }
 }
