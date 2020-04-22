@@ -17,6 +17,10 @@ namespace BinaryBox.Core.System.IO
                     Success = true;
                     Description = "Operation Succesfully";
                     break;
+                case ByteStreamManagerResponseStatusCode.Cancelled:
+                    Success = false;
+                    Description = "Operation Failed: Cancelled";
+                    break;
                 case ByteStreamManagerResponseStatusCode.OpenCloseTimeout:
                     Success = false;
                     Description = "Operation Failed: Timed Out";

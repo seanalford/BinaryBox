@@ -3,6 +3,7 @@
     public enum ByteStreamManagerResponseStatusCode
     {
         OK,
+        Cancelled,
         OpenCloseTimeout,
         AlreadyClosed,
         AlreadyOpen,

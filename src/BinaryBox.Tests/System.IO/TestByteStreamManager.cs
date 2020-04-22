@@ -11,18 +11,21 @@ namespace BinaryBox.Core.System.IO.Test
         // TODO:
         // Test Open
         // * Open Success
-        // * Open Already Open
+        // - Open Cancel
+        // * Open Already Open        
         // ? Open Timeout
-        // * Open Unhandled Exception
+        // * Open Unhandled Exception        
         // ? Open Mutex Timeout ???        
         // Test Close
         // - Close Success
+        // - Close Cancel
         // - Close Already Closed
         // - Close Timeout
         // - Close Unhandled Exception
         // - Close Mutex Timeout ???        
         // Test Read NumberOfBytes
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - PrimaryTimeout        
         // - SecondaryTimeout        
@@ -30,6 +33,7 @@ namespace BinaryBox.Core.System.IO.Test
         // - Mutex Timeout ???  
         // Test Read EndOfText
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - PrimaryTimeout        
         // - SecondaryTimeout        
@@ -37,6 +41,7 @@ namespace BinaryBox.Core.System.IO.Test
         // - Mutex Timeout ???  
         // Test Write
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - WriteTimeout                
         // - Unhandled Exception        
