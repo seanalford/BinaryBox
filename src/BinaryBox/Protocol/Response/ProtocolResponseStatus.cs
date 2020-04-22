@@ -2,18 +2,15 @@
 
 namespace BinaryBox.Protocol
 {
-    public class ProtocolResponseStatus : IResponseStatus<ProtocolResponseStatusCode>
+    public class ProtocolResponseStatus : ResponseStatus<ProtocolResponseStatusCode>, IProtocolResponseStatus
     {
-        public ProtocolResponseStatusCode Code { get; }
-
-        public string Description { get; }
-
-        public bool Success { get; }
-
-        public ProtocolResponseStatus(ProtocolResponseStatusCode code)
+        public ProtocolResponseStatus(ProtocolResponseStatusCode code) : base(code)
         {
-            //TODO: Move string literals to english resource file.
-            Code = code;
+        }
+
+        protected override void Initialize()
+        {
+            //TODO: Move string literals to english resource file.            
             switch (Code)
             {
                 case ProtocolResponseStatusCode.OK:
