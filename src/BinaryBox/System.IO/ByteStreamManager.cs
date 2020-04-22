@@ -117,7 +117,7 @@ namespace BinaryBox.Core.System.IO
             ByteStreamManagerResponse<byte[]> result = null;
             if (State != ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen, null);
+                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen);
             }
             else if (_mutex.WaitOne(Settings.ReadPrimaryTimeout))
             {
@@ -140,7 +140,7 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout, null);
+                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
@@ -150,7 +150,7 @@ namespace BinaryBox.Core.System.IO
             ByteStreamManagerResponse<byte[]> result = null;
             if (State != ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen, null);
+                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen);
             }
             else if (_mutex.WaitOne(Settings.ReadPrimaryTimeout))
             {
@@ -173,7 +173,7 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout, null);
+                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
