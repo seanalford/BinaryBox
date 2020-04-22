@@ -2,17 +2,11 @@
 
 namespace BinaryBox.Core.System.IO
 {
-    public class ByteStreamManagerResponse<TData> : IResponse<ByteStreamManagerResponseStatus, ByteStreamManagerResponseStatusCode, TData>
+    public class ByteStreamManagerResponse<TData> : Response<ByteStreamManagerResponseStatus, ByteStreamManagerResponseStatusCode, TData>, IResponse<ByteStreamManagerResponseStatus, ByteStreamManagerResponseStatusCode, TData>
     {
-        public ByteStreamManagerResponseStatus Status { get; }
-
-        public TData Data { get; }
-
-        public ByteStreamManagerResponse(ByteStreamManagerResponseStatusCode code, TData data)
+        public ByteStreamManagerResponse(ByteStreamManagerResponseStatusCode code, TData data = default) : base(code, data)
         {
             Status = new ByteStreamManagerResponseStatus(code);
-            Data = data;
         }
     }
-
 }
