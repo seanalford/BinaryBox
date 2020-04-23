@@ -1,6 +1,6 @@
 ﻿namespace BinaryBox.Core.System.IO
 {
-    public enum ByteStreamManagerResponseStatusCode
+    public enum ByteStreamResponseStatusCode
     {
         OK,
         Cancelled,
