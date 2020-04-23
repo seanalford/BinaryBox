@@ -10,11 +10,10 @@ namespace BinaryBox.Core.System.IO
         ILogger Log { get; }
         IByteStreamSettings Settings { get; set; }
         ByteStreamState State { get; }
-        Task<ByteStreamManagerResponse<ByteStreamState>> OpenAsync();
-        Task<ByteStreamManagerResponse<ByteStreamState>> CloseAsync();
-        Task<ByteStreamManagerResponse<byte[]>> ReadAsync(int bytesToRead, CancellationToken cancellationToken = default);
-        Task<ByteStreamManagerResponse<byte[]>> ReadAsync(byte endOfText, CancellationToken cancellationToken = default, int checksumLength = 0);
-        Task<ByteStreamManagerResponse<bool>> WriteAsync(byte[] data, CancellationToken cancellationToken);
+        Task<ByteStreamResponse<ByteStreamState>> OpenAsync();
+        Task<ByteStreamResponse<ByteStreamState>> CloseAsync();
+        Task<ByteStreamResponse<byte[]>> ReadAsync(int bytesToRead, CancellationToken cancellationToken = default);
+        Task<ByteStreamResponse<byte[]>> ReadAsync(byte endOfText, int checksumLength = 0, CancellationToken cancellationToken = default);
+        Task<ByteStreamResponse<bool>> WriteAsync(byte[] data, CancellationToken cancellationToken);
     }
-
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +17,8 @@ namespace BinaryBox.Core.System.IO
 
         public ByteStreamState State => _btyeStream.State;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public ByteStreamManager(IByteStream byteStream, IByteStreamSettings settings, ILogger logger = default)
         {
             _btyeStream = byteStream;
@@ -23,12 +26,12 @@ namespace BinaryBox.Core.System.IO
             Log = logger;
         }
 
-        public async Task<ByteStreamManagerResponse<ByteStreamState>> CloseAsync()
+        public async Task<ByteStreamResponse<ByteStreamState>> CloseAsync()
         {
-            ByteStreamManagerResponse<ByteStreamState> result = null;
+            ByteStreamResponse<ByteStreamState> result = null;
             if (State == ByteStreamState.Closed)
             {
-                result = new ByteStreamManagerResponse<ByteStreamState>(ByteStreamManagerResponseStatusCode.AlreadyClosed, State);
+                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyClosed, State);
             }
             else if (_mutex.WaitOne(Settings.OpenCloseTimeout))
             {
@@ -51,7 +54,7 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<ByteStreamState>(ByteStreamManagerResponseStatusCode.OpenCloseTimeout, State);
+                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OpenCloseTimeout, State);
             }
             return result;
         }
@@ -79,12 +82,12 @@ namespace BinaryBox.Core.System.IO
             }
         }
 
-        public async Task<ByteStreamManagerResponse<ByteStreamState>> OpenAsync()
+        public async Task<ByteStreamResponse<ByteStreamState>> OpenAsync()
         {
-            ByteStreamManagerResponse<ByteStreamState> result = null;
+            ByteStreamResponse<ByteStreamState> result = null;
             if (State == ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<ByteStreamState>(ByteStreamManagerResponseStatusCode.AlreadyOpen, State);
+                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyOpen, State);
             }
             else if (_mutex.WaitOne(Settings.OpenCloseTimeout))
             {
@@ -107,25 +110,25 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<ByteStreamState>(ByteStreamManagerResponseStatusCode.OpenCloseTimeout, State);
+                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OpenCloseTimeout, State);
             }
             return result;
         }
 
-        public async Task<ByteStreamManagerResponse<byte[]>> ReadAsync(int bytesToRead, CancellationToken cancellationToken = default)
+        public async Task<ByteStreamResponse<byte[]>> ReadAsync(int bytesToRead, CancellationToken cancellationToken = default)
         {
-            ByteStreamManagerResponse<byte[]> result = null;
+            ByteStreamResponse<byte[]> result = null;
             if (State != ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen);
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            else if (_mutex.WaitOne(Settings.ReadPrimaryTimeout))
+            else if (_mutex.WaitOne(Settings.PrimaryReadTimeout))
             {
                 try
                 {
                     try
                     {
-                        // TODO result = await ReadPrimaryAsync(bytesToRead,cancellationToken);
+                        result = await _btyeStream.ReadAsync(bytesToRead, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -140,25 +143,25 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout);
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
 
-        public async Task<ByteStreamManagerResponse<byte[]>> ReadAsync(byte endOfText, CancellationToken cancellationToken = default, int checksumLength = 0)
+        public async Task<ByteStreamResponse<byte[]>> ReadAsync(byte endOfText, int checksumLength = 0, CancellationToken cancellationToken = default)
         {
-            ByteStreamManagerResponse<byte[]> result = null;
+            ByteStreamResponse<byte[]> result = null;
             if (State != ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.NotOpen);
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            else if (_mutex.WaitOne(Settings.ReadPrimaryTimeout))
+            else if (_mutex.WaitOne(Settings.PrimaryReadTimeout))
             {
                 try
                 {
                     try
                     {
-                        // TODO result = await ReadPrimaryAsync(endOfText, checksumLength, cancellationToken);
+                        result = await _btyeStream.ReadAsync(endOfText, checksumLength, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -173,17 +176,17 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<byte[]>(ByteStreamManagerResponseStatusCode.PrimaryReadTimeout);
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
 
-        public async Task<ByteStreamManagerResponse<bool>> WriteAsync(byte[] data, CancellationToken cancellationToken)
+        public async Task<ByteStreamResponse<bool>> WriteAsync(byte[] data, CancellationToken cancellationToken)
         {
-            ByteStreamManagerResponse<bool> result = null;
+            ByteStreamResponse<bool> result = null;
             if (State != ByteStreamState.Open)
             {
-                result = new ByteStreamManagerResponse<bool>(ByteStreamManagerResponseStatusCode.NotOpen, false);
+                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen, false);
             }
             else if (_mutex.WaitOne(Settings.WriteTimeout))
             {
@@ -191,7 +194,7 @@ namespace BinaryBox.Core.System.IO
                 {
                     try
                     {
-                        result = await _btyeStream.WriteAsync(data, 0, data.Length);
+                        result = await _btyeStream.WriteAsync(data, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -206,7 +209,7 @@ namespace BinaryBox.Core.System.IO
             }
             else
             {
-                result = new ByteStreamManagerResponse<bool>(ByteStreamManagerResponseStatusCode.WriteTimeout, false);
+                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.WriteTimeout, false);
             }
             return result;
         }
