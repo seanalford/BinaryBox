@@ -6,9 +6,8 @@ namespace BinaryBox.Core.System.IO
     {
         int OpenCloseTimeout { get; set; }
         int BufferSize { get; set; }
-        int ReadPrimaryTimeout { get; set; }
-        int ReadSecondaryTimeout { get; set; }
+        int PrimaryReadTimeout { get; set; }
+        int SecondaryReadTimeout { get; set; }
         int WriteTimeout { get; set; }
     }
-
 }
