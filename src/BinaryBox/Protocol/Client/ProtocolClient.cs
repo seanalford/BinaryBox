@@ -33,7 +33,7 @@ namespace BinaryBox.Protocol
 
             var result = await Tx(message, cancellationToken);
 
-            if (result.Status.Success)
+            if (result.Success)
             {
                 result = await Rx(message, cancellationToken);
             }
@@ -84,7 +84,7 @@ namespace BinaryBox.Protocol
                 if (retires++ == Settings.SendRetries)
                 {
                     result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.SendRetryLimitExceeded);
-                    Log?.LogInformation(result.Status.Description);
+                    Log?.LogInformation(result.Description);
                     break;
                 }
             }
@@ -126,7 +126,7 @@ namespace BinaryBox.Protocol
                         if (retires++ == Settings.ReceiveRetries)
                         {
                             result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.ReceiveRetryLimitExceeded);
-                            Log?.LogInformation(result.Status.Description);
+                            Log?.LogInformation(result.Description);
                             // Send Abort signal to the host?
                             await SendAbort(message, cancellationToken);
                             break;

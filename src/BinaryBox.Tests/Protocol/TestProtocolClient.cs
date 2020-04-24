@@ -30,7 +30,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Code.Should().Be(expectedResult);
+            result.Status.Should().Be(expectedResult);
         }
 
         // Test Tx Retries
@@ -55,7 +55,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Code.Should().Be(expectedResult);
+            result.Status.Should().Be(expectedResult);
         }
 
         // Test Rx Retries
@@ -82,7 +82,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Code.Should().Be(expectedResult); //.BeOfType<ReceiveRetryLimitExceededException>();
+            result.Status.Should().Be(expectedResult); //.BeOfType<ReceiveRetryLimitExceededException>();
         }
 
         // Test Rx Retries
@@ -108,7 +108,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, cancellationToken);
 
             // Assert
-            result.Status.Code.Should().Be(expectedResult);
+            result.Status.Should().Be(expectedResult);
         }
 
         [Theory]                                                                        // [STX][MSGT]  [Item 0-FFFF ]  [IEEE Float                  ][ETX]              
@@ -132,7 +132,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, CancellationToken.None);
 
             // Arrange
-            result.Status.Code.Should().Be(expectedStatus);
+            result.Status.Should().Be(expectedStatus);
             message.Data.Item.Should().Be(expectedItem);
             message.Data.Value.Should().Be(expectedValue);
         }
@@ -154,7 +154,7 @@ namespace BinaryBox.Protocol.Test
             var result = await client.SendAsync(message, CancellationToken.None);
 
             // Arrange
-            result.Status.Code.Should().Be(expectedStatus);
+            result.Status.Should().Be(expectedStatus);
         }
     }
 }

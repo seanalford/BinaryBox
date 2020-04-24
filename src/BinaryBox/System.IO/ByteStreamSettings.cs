@@ -14,8 +14,8 @@ namespace BinaryBox.Core.System.IO
 
         public int OpenCloseTimeout { get; set; } = DEFAULT_OPEN_CLOSE_TIMEOUT;
         public int BufferSize { get; set; } = DEFAULT_BUFFER_SIZE;
-        public int ReadPrimaryTimeout { get; set; } = DEFAULT_PRIMARY_READ_TIMEOUT;
-        public int ReadSecondaryTimeout { get; set; } = DEFAULT_SECONDARY_READ_TIMEOUT;
+        public int PrimaryReadTimeout { get; set; } = DEFAULT_PRIMARY_READ_TIMEOUT;
+        public int SecondaryReadTimeout { get; set; } = DEFAULT_SECONDARY_READ_TIMEOUT;
         public int WriteTimeout { get; set; } = DEFAULT_WRITE_TIMEOUT;
 
         public void Dispose()

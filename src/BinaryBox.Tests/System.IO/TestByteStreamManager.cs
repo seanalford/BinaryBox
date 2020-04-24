@@ -11,18 +11,21 @@ namespace BinaryBox.Core.System.IO.Test
         // TODO:
         // Test Open
         // * Open Success
-        // * Open Already Open
+        // - Open Cancel
+        // * Open Already Open        
         // ? Open Timeout
-        // * Open Unhandled Exception
+        // * Open Unhandled Exception        
         // ? Open Mutex Timeout ???        
         // Test Close
         // - Close Success
+        // - Close Cancel
         // - Close Already Closed
         // - Close Timeout
         // - Close Unhandled Exception
         // - Close Mutex Timeout ???        
         // Test Read NumberOfBytes
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - PrimaryTimeout        
         // - SecondaryTimeout        
@@ -30,6 +33,7 @@ namespace BinaryBox.Core.System.IO.Test
         // - Mutex Timeout ???  
         // Test Read EndOfText
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - PrimaryTimeout        
         // - SecondaryTimeout        
@@ -37,6 +41,7 @@ namespace BinaryBox.Core.System.IO.Test
         // - Mutex Timeout ???  
         // Test Write
         // - Success (1,2,3,4,5,n)
+        // - Cancel
         // - NotOpen        
         // - WriteTimeout                
         // - Unhandled Exception        
@@ -47,15 +52,15 @@ namespace BinaryBox.Core.System.IO.Test
         {
             // Arrange                             
             IByteStream byteStream = Substitute.For<IByteStream>();
-            byteStream.OpenAsync().Returns(new ByteStreamManagerResponse<ByteStreamState>(ByteStreamManagerResponseStatusCode.OK, ByteStreamState.Open));
+            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
             // Act
             var result = await byteStreamManager.OpenAsync();
 
             // Assert
-            result.Status.Code.Should().Be(ByteStreamManagerResponseStatusCode.OK);
-            result.Status.Success.Should().BeTrue();
+            result.Status.Should().Be(ByteStreamResponseStatusCode.OK);
+            result.Success.Should().BeTrue();
             result.Data.Should().Be(ByteStreamState.Open);
 
         }
@@ -72,8 +77,8 @@ namespace BinaryBox.Core.System.IO.Test
             var result = await byteStreamManager.OpenAsync();
 
             // Assert
-            result.Status.Code.Should().Be(ByteStreamManagerResponseStatusCode.AlreadyOpen);
-            result.Status.Success.Should().BeFalse();
+            result.Status.Should().Be(ByteStreamResponseStatusCode.AlreadyOpen);
+            result.Success.Should().BeFalse();
             result.Data.Should().Be(ByteStreamState.Open);
 
         }
