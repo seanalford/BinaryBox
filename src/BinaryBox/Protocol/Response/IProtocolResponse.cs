@@ -2,9 +2,9 @@
 
 namespace BinaryBox.Protocol
 {
-    public interface IProtocolResponse<TData> : IResponse<ProtocolResponseStatus, ProtocolResponseStatusCode, TData>
+    public interface IProtocolResponse<TData> : IResponse<ProtocolResponseStatusCode, TData>
+        where TData : IProtocolMessageData
     {
 
     }
-
 }

@@ -59,8 +59,8 @@ namespace BinaryBox.Core.System.IO.Test
             var result = await byteStreamManager.OpenAsync();
 
             // Assert
-            result.Status.Code.Should().Be(ByteStreamResponseStatusCode.OK);
-            result.Status.Success.Should().BeTrue();
+            result.Status.Should().Be(ByteStreamResponseStatusCode.OK);
+            result.Success.Should().BeTrue();
             result.Data.Should().Be(ByteStreamState.Open);
 
         }
@@ -77,8 +77,8 @@ namespace BinaryBox.Core.System.IO.Test
             var result = await byteStreamManager.OpenAsync();
 
             // Assert
-            result.Status.Code.Should().Be(ByteStreamResponseStatusCode.AlreadyOpen);
-            result.Status.Success.Should().BeFalse();
+            result.Status.Should().Be(ByteStreamResponseStatusCode.AlreadyOpen);
+            result.Success.Should().BeFalse();
             result.Data.Should().Be(ByteStreamState.Open);
 
         }
