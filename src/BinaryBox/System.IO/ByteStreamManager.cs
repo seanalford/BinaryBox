@@ -26,7 +26,7 @@ namespace BinaryBox.Core.System.IO
             Log = logger;
         }
 
-        public async Task<ByteStreamResponse<ByteStreamState>> CloseAsync()
+        public async Task<ByteStreamResponse<ByteStreamState>> CloseAsync(CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<ByteStreamState> result = null;
             if (State == ByteStreamState.Closed)
@@ -82,7 +82,7 @@ namespace BinaryBox.Core.System.IO
             }
         }
 
-        public async Task<ByteStreamResponse<ByteStreamState>> OpenAsync()
+        public async Task<ByteStreamResponse<ByteStreamState>> OpenAsync(CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<ByteStreamState> result = null;
             if (State == ByteStreamState.Open)
