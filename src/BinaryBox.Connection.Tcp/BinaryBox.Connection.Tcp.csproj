@@ -12,10 +12,4 @@
     <ProjectReference Include="..\BinaryBox\BinaryBox.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Toolbox">
-      <HintPath>..\Toolbox\bin\Debug\netstandard2.0\Toolbox.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

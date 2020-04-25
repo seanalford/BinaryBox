@@ -27,7 +27,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
-            byteStream.ReadAsync(out Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns
                 (
                     x => { x[0] = data[1]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
                     x => { x[0] = data[2]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
@@ -99,7 +99,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
-            byteStream.When(x => x.ReadAsync(out Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
+            byteStream.When(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
             IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
             // Act

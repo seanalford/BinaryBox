@@ -49,7 +49,7 @@ namespace BinaryBox.Core.System.IO
                     if (cancellationToken.IsCancellationRequested) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.Cancelled); break; }
                     if (stopwatch.ElapsedMilliseconds > byteStream.Settings.SecondaryReadTimeout) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.SecondaryReadTimeout); break; }
 
-                    var response = await byteStream.ReadAsync(out resultData, byteOffset, bytesRemaining);
+                    var response = await byteStream.ReadAsync(resultData, byteOffset, bytesRemaining);
 
                     if (response.Success && response.Data > 0)
                     {
@@ -148,7 +148,7 @@ namespace BinaryBox.Core.System.IO
                 var primaryReadResponse = await byteStream.ReadPrimaryAsync(cancellationToken);
                 if (primaryReadResponse.Success)
                 {
-                    result = await byteStream.ReadSecondaryAsync(endOfText, cancellationToken);
+                    result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,5 @@
 ﻿using BinaryBox.Checksum;
-using BinaryBox.Connection;
+using BinaryBox.Core.System.IO;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -12,10 +12,10 @@ namespace BinaryBox.Protocol
         where TProtocolMessage : IProtocolMessage<TProtocolSettings, TProtocolMessageData>
         where TProtocolMessageData : IProtocolMessageData
     {
-        public IConnection Connection { get; protected set; }
+        public IByteStreamManager Connection { get; protected set; }
         public TProtocolSettings Settings { get; protected set; }
 
-        public ProtocolClient(ILogger logger, IConnection connection, TProtocolSettings settings) : base(logger)
+        public ProtocolClient(ILogger logger, IByteStreamManager connection, TProtocolSettings settings) : base(logger)
         {
             Connection = connection;
             Settings = settings;
@@ -56,16 +56,21 @@ namespace BinaryBox.Protocol
                 try
                 {
                     // Send encoded message.
-                    if (await Connection.WriteAsync(message.Encode(), cancellationToken))
+                    var txResponse = await Connection.WriteAsync(message.Encode(), cancellationToken);
+                    if (txResponse.Success)
                     {
                         // Validate Trasmission?
                         if (message.ValidateTx)
                         {
-                            // Valid Repsonce?
-                            if (message.ValidTx(await TxResult(message, cancellationToken)))
+                            var responce = await TxResult(message, cancellationToken);
+                            if (responce.Success)
                             {
-                                result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK);
-                                break;
+                                // Valid Repsonce?
+                                if (message.ValidTx(responce.Data))
+                                {
+                                    result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK);
+                                    break;
+                                }
                             }
                         }
                         else
@@ -106,34 +111,36 @@ namespace BinaryBox.Protocol
             {
                 try
                 {
-                    byte[] data = await RxRead(message, cancellationToken);
-
-                    if (message.Decode(data))
+                    var responce = await RxRead(message, cancellationToken);
+                    if (responce.Success)
                     {
-                        // Send ACK to host to signal message received.
-                        await SendAck(message, cancellationToken);
-
-                        message.DecodeData();
-
-                        if (message.Complete)
+                        if (message.Decode(responce.Data))
                         {
-                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK, message.Data);
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (retires++ == Settings.ReceiveRetries)
-                        {
-                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.ReceiveRetryLimitExceeded);
-                            Log?.LogInformation(result.Description);
-                            // Send Abort signal to the host?
-                            await SendAbort(message, cancellationToken);
-                            break;
+                            // Send ACK to host to signal message received.
+                            await SendAck(message, cancellationToken);
+
+                            message.DecodeData();
+
+                            if (message.Complete)
+                            {
+                                result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK, message.Data);
+                                break;
+                            }
                         }
                         else
                         {
-                            await SendNak(message, cancellationToken);
+                            if (retires++ == Settings.ReceiveRetries)
+                            {
+                                result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.ReceiveRetryLimitExceeded);
+                                Log?.LogInformation(result.Description);
+                                // Send Abort signal to the host?
+                                await SendAbort(message, cancellationToken);
+                                break;
+                            }
+                            else
+                            {
+                                await SendNak(message, cancellationToken);
+                            }
                         }
                     }
                 }
@@ -146,23 +153,23 @@ namespace BinaryBox.Protocol
             return result;
         }
 
-        private async Task<byte[]> RxRead(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<ByteStreamResponse<byte[]>> RxRead(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            byte[] result;
+            ByteStreamResponse<byte[]> result = default;
             if (message.RxBytesToRead > 0)
             {
                 result = await Connection.ReadAsync(message.RxBytesToRead, cancellationToken);
             }
             else
             {
-                result = await Connection.ReadAsync(message.RxEndOfMessageToken, cancellationToken, Settings.Checksum.Length());
+                result = await Connection.ReadAsync(message.RxEndOfMessageToken, Settings.Checksum.Length(), cancellationToken);
             }
             return result;
         }
 
-        private async Task<bool> SendAck(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<ByteStreamResponse<bool>> SendAck(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            bool result = false;
+            ByteStreamResponse<bool> result = default;
             // Send ACK to host to signal message received.
             if (message.Ack?.Length > 0)
             {
@@ -171,9 +178,9 @@ namespace BinaryBox.Protocol
             return result;
         }
 
-        private async Task<bool> SendNak(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<ByteStreamResponse<bool>> SendNak(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            bool result = false;
+            ByteStreamResponse<bool> result = default;
             // Send ACK to host to signal message received.
             if (message.Nak?.Length > 0)
             {
@@ -182,9 +189,9 @@ namespace BinaryBox.Protocol
             return result;
         }
 
-        private async Task<bool> SendAbort(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<ByteStreamResponse<bool>> SendAbort(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            bool result = false;
+            ByteStreamResponse<bool> result = default;
             // Send ACK to host to signal message received.
             if (message.Abort?.Length > 0)
             {
@@ -193,9 +200,9 @@ namespace BinaryBox.Protocol
             return result;
         }
 
-        private async Task<byte[]> TxResult(TProtocolMessage message, CancellationToken cancellationToken)
+        private async Task<ByteStreamResponse<byte[]>> TxResult(TProtocolMessage message, CancellationToken cancellationToken)
         {
-            byte[] result = null;
+            ByteStreamResponse<byte[]> result = default;
 
             try
             {
@@ -205,7 +212,7 @@ namespace BinaryBox.Protocol
                 }
                 else
                 {
-                    result = await Connection.ReadAsync((byte)message.TxEndOfMessageToken, cancellationToken, Settings.Checksum.Length());
+                    result = await Connection.ReadAsync((byte)message.TxEndOfMessageToken, Settings.Checksum.Length(), cancellationToken);
                 }
             }
             catch (Exception ex)

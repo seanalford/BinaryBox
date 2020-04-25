@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BinaryBox.Core.System.IO;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -7,87 +8,179 @@ using System.Threading.Tasks;
 
 namespace BinaryBox.Connection.Tcp
 {
-    public class TcpConnection : Connection, ITcpConnection
+    public class TcpConnection : ByteStream, ITcpConnection
     {
-        private TcpClient Client = null;
         public string Host { get; set; }
         public int Port { get; set; }
 
-        #region Constructors
-        public TcpConnection(ILogger logger, IConnectionSettings settings) : base(logger, settings)
-        {
+        private TcpClient Client = null;
 
-        }
-        #endregion
-
-        public async Task<ConnectionState> ConnectAsync(string host, int port)
+        public TcpConnection(ILogger logger, IByteStreamSettings settings) : base(logger, settings)
         {
-            Host = host;
-            Port = port;
-            return await ConnectAsync();
         }
 
-        public async override Task<bool> DataAvailableAsync()
+        public async override Task<ByteStreamResponse<ByteStreamState>> CloseAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() => Client.GetStream().DataAvailable);
+            ByteStreamResponse<ByteStreamState> result = default;
+            try
+            {
+                if (Client?.Connected == false) { result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyClosed, ByteStreamState.Closed); }
+                if (result == default)
+                {
+                    var reponse = await Task.Run(() =>
+                    {
+                        Client.Close();
+                        return Client.Connected == false;
+                    });
+
+                    if (reponse)
+                    {
+                        State = ByteStreamState.Closed;
+                        Client.Dispose();
+                        Client = null;
+                    }
+
+                    result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, State);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
+            }
+            return result;
+        }
+
+        public async override Task<ByteStreamResponse<bool>> DataAvailableAsync()
+        {
+            ByteStreamResponse<bool> result = default;
+            try
+            {
+                var reponse = await Task.Run(() => { return Client?.GetStream().DataAvailable == true; });
+                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, reponse);
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
+            }
+            return result;
         }
 
         public override void Dispose()
         {
-            Client?.Close();
+            DisposeClient();
         }
 
-        protected async override Task<bool> ConnectTask()
+        private void DisposeClient()
         {
-            if (Client == null)
+            if (Client != null)
             {
-                Client = new TcpClient
-                {
-                    ReceiveTimeout = Settings.SecondaryReadTimeout,
-                    SendTimeout = Settings.WriteTimeout
-                };
+                if (Client.Connected) Client.Close();
+                Client.Dispose();
             }
-
-            IPAddress ipAddress = Dns.GetHostAddresses(Host)[0];
-            await Client.ConnectAsync(ipAddress, Port);
-
-            return Client.Connected;
         }
 
-        protected async override Task<bool> DisconnectTask()
+        public override async Task<ByteStreamResponse<ByteStreamState>> OpenAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() =>
-            {
-                bool result = true;
-                try
-                {
-                    Client?.Close();
-                }
-                catch (Exception ex)
-                {
-                    result = false;
-                    //TODO:Log.Exception(ex);
-                }
-                return result;
-            });
-        }
-
-        protected async override Task<int> ReadTask(byte[] data, CancellationToken cancellationToken)
-        {
-            return await Client.GetStream().ReadAsync(data, 0, data.Length, cancellationToken);
-        }
-
-        protected async override Task<bool> WriteTask(byte[] data, CancellationToken cancellationToken)
-        {
-            bool result = true;
+            ByteStreamResponse<ByteStreamState> result = default;
             try
             {
-                await Client.GetStream().WriteAsync(data, 0, data.Length);
+                if (Client?.Connected == true) { result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyOpen, ByteStreamState.Open); }
+                if (result == default)
+                {
+                    DisposeClient();
+                    Client = new TcpClient
+                    {
+                        ReceiveTimeout = Settings.SecondaryReadTimeout,
+                        SendTimeout = Settings.WriteTimeout
+                    };
+
+                    IPAddress ipAddress = Dns.GetHostAddresses(Host)[0];
+                    await Client.ConnectAsync(ipAddress, Port);
+
+                    if (Client.Connected)
+                    {
+                        State = ByteStreamState.Open;
+                        result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, State);
+                    }
+                    else
+                    {
+                        result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.Failed, State);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                result = false;
-                //TODO:Log.Exception(ex);
+                Log?.LogError(ex, ex.Message);
+                throw;
+            }
+            return result;
+        }
+
+        public async override Task<ByteStreamResponse<int>> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
+        {
+            ByteStreamResponse<int> result = default;
+            try
+            {
+                if (Client?.Connected == false) { result = new ByteStreamResponse<int>(ByteStreamResponseStatusCode.NotOpen, 0); }
+                if (result == default)
+                {
+                    var responce = await Client.GetStream().ReadAsync(buffer, offset, count, cancellationToken);
+
+                    // NOTE: WriteAsync only returns number of bytes written so we're assuming OK, and that
+                    //       an exception will be thrown otherwise.
+                    result = new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, responce);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
+            }
+            return result;
+        }
+
+        public async override Task<ByteStreamResponse<bool>> WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
+        {
+            ByteStreamResponse<bool> result = default;
+            try
+            {
+                if (Client?.Connected == false) { result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen, false); }
+                if (result == default)
+                {
+                    await Client.GetStream().WriteAsync(buffer, offset, count, cancellationToken);
+
+                    // NOTE: WriteAsync does not return a status so we're assuming OK, and that
+                    //       an exception will be thrown otherwise.
+                    result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
+            }
+            return result;
+        }
+
+        public async Task<ByteStreamResponse<ByteStreamState>> OpenAsync(string host, int port)
+        {
+            ByteStreamResponse<ByteStreamState> result = default;
+            try
+            {
+                if (Client?.Connected == true) { result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyOpen, ByteStreamState.Open); }
+                if (result == default)
+                {
+                    Host = host;
+                    Port = port;
+                    result = await OpenAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
             return result;
         }

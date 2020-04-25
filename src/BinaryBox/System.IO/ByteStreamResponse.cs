@@ -14,18 +14,6 @@ namespace BinaryBox.Core.System.IO
             //TODO: Move string literals to english resource file.
             switch (Status)
             {
-                case ByteStreamResponseStatusCode.OK:
-                    Success = true;
-                    Description = "Operation Succesfully";
-                    break;
-                case ByteStreamResponseStatusCode.Cancelled:
-                    Success = false;
-                    Description = "Operation Failed: Cancelled";
-                    break;
-                case ByteStreamResponseStatusCode.OpenCloseTimeout:
-                    Success = false;
-                    Description = "Operation Failed: Timed Out";
-                    break;
                 case ByteStreamResponseStatusCode.AlreadyClosed:
                     Success = false;
                     Description = "Operation Failed: Already Closed";
@@ -34,13 +22,25 @@ namespace BinaryBox.Core.System.IO
                     Success = false;
                     Description = "Operation Failed: Already Open";
                     break;
+                case ByteStreamResponseStatusCode.Cancelled:
+                    Success = false;
+                    Description = "Operation Failed: Cancelled";
+                    break;
+                case ByteStreamResponseStatusCode.Failed:
+                    Success = false;
+                    Description = "Operation Failed";
+                    break;
                 case ByteStreamResponseStatusCode.NotOpen:
                     Success = false;
                     Description = "Operation Failed: Not Open";
                     break;
-                case ByteStreamResponseStatusCode.WriteTimeout:
+                case ByteStreamResponseStatusCode.OK:
+                    Success = true;
+                    Description = "Operation Succesfully";
+                    break;
+                case ByteStreamResponseStatusCode.OpenCloseTimeout:
                     Success = false;
-                    Description = "Operation Failed: Write Timeout";
+                    Description = "Operation Failed: Timed Out";
                     break;
                 case ByteStreamResponseStatusCode.PrimaryReadTimeout:
                     Success = false;
@@ -49,6 +49,10 @@ namespace BinaryBox.Core.System.IO
                 case ByteStreamResponseStatusCode.SecondaryReadTimeout:
                     Success = false;
                     Description = "Operation Failed: Secondary Read Timeout";
+                    break;
+                case ByteStreamResponseStatusCode.WriteTimeout:
+                    Success = false;
+                    Description = "Operation Failed: Write Timeout";
                     break;
             }
         }
