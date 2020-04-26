@@ -99,6 +99,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.When(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
+
             IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
             // Act

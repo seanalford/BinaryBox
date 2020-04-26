@@ -13,7 +13,7 @@ namespace BinaryBox.Core.System.IO
         Task<ByteStreamResponse<ByteStreamState>> OpenAsync(CancellationToken cancellationToken = default);
         Task<ByteStreamResponse<ByteStreamState>> CloseAsync(CancellationToken cancellationToken = default);
         Task<ByteStreamResponse<bool>> DataAvailableAsync();
-        Task<ByteStreamResponse<int>> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default);
+        Task<ByteStreamResponse<int>> ReadAsync(out byte[] buffer, int offset, int count, CancellationToken cancellationToken = default);
         Task<ByteStreamResponse<bool>> WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default);
     }
 }

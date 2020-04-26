@@ -18,7 +18,7 @@ namespace BinaryBox.Core.System.IO.Test
         // * Cancel
         // * Already Open        
         // * Timeout
-        // * Unhandled Exception                
+        // * Unhandled Exception
 
         [Fact]
         public async Task TestSuccess()
