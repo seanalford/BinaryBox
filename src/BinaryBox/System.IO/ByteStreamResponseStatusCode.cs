@@ -2,14 +2,15 @@
 {
     public enum ByteStreamResponseStatusCode
     {
-        OK,
-        Cancelled,
-        OpenCloseTimeout,
         AlreadyClosed,
         AlreadyOpen,
+        Cancelled,
+        Failed,
         NotOpen,
-        WriteTimeout,
+        OK,
+        OpenCloseTimeout,
         PrimaryReadTimeout,
         SecondaryReadTimeout,
+        WriteTimeout,
     }
 }

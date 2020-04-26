@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Core.System.IO;
+using FluentAssertions;
 using System.Net;
 using System.Net.Sockets;
 using Xunit;
@@ -27,14 +28,14 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings()) { Host = host, Port = port };
+            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings()) { Host = host, Port = port };
 
             // Act
-            ConnectionState state = await connection.ConnectAsync();
+            var response = await connection.OpenAsync();
             Server.Stop();
 
             // Assert
-            state.Should().Be(expectedResult);
+            response.Data.Should().Be(expectedResult);
             connection.State.Should().Be(expectedResult);
 
         }
@@ -45,14 +46,14 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings());
+            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings());
 
             // Act
-            ConnectionState state = await connection.ConnectAsync(host, port);
+            var state = await connection.OpenAsync(host, port);
             Server.Stop();
 
             // Assert
-            state.Should().Be(expectedResult);
+            state.Data.Should().Be(expectedResult);
             connection.State.Should().Be(expectedResult);
 
         }
@@ -63,14 +64,14 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings() { PrimaryReadTimeout = 500 });
+            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings() { PrimaryReadTimeout = 500 });
 
             // Act
-            ConnectionState state = await connection.ConnectAsync(host, port);
+            var state = await connection.OpenAsync(host, port);
             Server.Stop();
 
             // Assert
-            state.Should().Be(expectedResult);
+            state.Data.Should().Be(expectedResult);
             connection.State.Should().Be(expectedResult);
         }
 
@@ -80,15 +81,15 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings());
+            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings());
 
             // Act
-            ConnectionState state = await connection.ConnectAsync(host, port);
-            state = await connection.DisconnectAsync();
+            var state = await connection.OpenAsync(host, port);
+            state = await connection.CloseAsync();
             Server.Stop();
 
             // Assert
-            state.Should().Be(expectedResult);
+            state.Data.Should().Be(expectedResult);
             connection.State.Should().Be(expectedResult);
         }
 
@@ -98,11 +99,11 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ConnectionSettings() { PrimaryReadTimeout = 500 });
+            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings() { PrimaryReadTimeout = 500 });
 
             // Act
-            ConnectionState state = await connection.ConnectAsync(host, port);
-            state = await connection.DisconnectAsync();
+            var state = await connection.OpenAsync(host, port);
+            state = await connection.CloseAsync();
             Server.Stop();
 
             // Assert

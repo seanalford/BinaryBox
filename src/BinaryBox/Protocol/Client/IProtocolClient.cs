@@ -1,4 +1,4 @@
-﻿using BinaryBox.Connection;
+﻿using BinaryBox.Core.System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +9,8 @@ namespace BinaryBox.Protocol
         where TProtocolMessage : IProtocolMessage<TProtocolSettings, TProtocolMessageData>
         where TProtocolMessageData : IProtocolMessageData
     {
-        IConnection Connection { get; }
+        IByteStreamManager Connection { get; }
+        //IConnection Connection { get; }
         Task<IProtocolResponse<TProtocolMessageData>> SendAsync(TProtocolMessage message, CancellationToken cancellationToken);
     }
 }

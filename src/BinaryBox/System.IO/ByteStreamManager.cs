@@ -9,7 +9,6 @@ namespace BinaryBox.Core.System.IO
     public class ByteStreamManager : IByteStreamManager
     {
         private IByteStream _btyeStream;
-        private Mutex _mutex = new Mutex();
 
         public ILogger Log { get; protected set; }
 
@@ -33,52 +32,32 @@ namespace BinaryBox.Core.System.IO
             {
                 result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyClosed, State);
             }
-            else if (_mutex.WaitOne(Settings.OpenCloseTimeout))
+            else
             {
                 try
                 {
-                    try
-                    {
-                        result = await _btyeStream.CloseAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
+                    result = await _btyeStream.CloseAsync().ConfigureAwait(false);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
+                    Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            else
-            {
-                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OpenCloseTimeout, State);
+
             }
             return result;
         }
 
         public void Dispose()
         {
-            if (_mutex.WaitOne())
+            try
             {
-                try
-                {
-                    try
-                    {
-                        // Dispose disposables here.
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
-                }
-                finally
-                {
-                    _mutex.ReleaseMutex();
-                }
+                // Dispose disposables here.
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError(ex, ex.Message);
+                throw;
             }
         }
 
@@ -89,28 +68,17 @@ namespace BinaryBox.Core.System.IO
             {
                 result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.AlreadyOpen, State);
             }
-            else if (_mutex.WaitOne(Settings.OpenCloseTimeout))
+            else
             {
                 try
                 {
-                    try
-                    {
-                        result = await _btyeStream.OpenAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
+                    result = await _btyeStream.OpenAsync().ConfigureAwait(false);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
+                    Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            else
-            {
-                result = new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OpenCloseTimeout, State);
             }
             return result;
         }
@@ -122,28 +90,17 @@ namespace BinaryBox.Core.System.IO
             {
                 result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            else if (_mutex.WaitOne(Settings.PrimaryReadTimeout))
+            else
             {
                 try
                 {
-                    try
-                    {
-                        result = await _btyeStream.ReadAsync(bytesToRead, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
+                    result = await _btyeStream.ReadAsync(bytesToRead, cancellationToken).ConfigureAwait(false);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
+                    Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            else
-            {
-                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
@@ -155,28 +112,17 @@ namespace BinaryBox.Core.System.IO
             {
                 result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            else if (_mutex.WaitOne(Settings.PrimaryReadTimeout))
+            else
             {
                 try
                 {
-                    try
-                    {
-                        result = await _btyeStream.ReadAsync(endOfText, checksumLength, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
+                    result = await _btyeStream.ReadAsync(endOfText, checksumLength, cancellationToken).ConfigureAwait(false);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
+                    Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            else
-            {
-                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.PrimaryReadTimeout);
             }
             return result;
         }
@@ -188,28 +134,17 @@ namespace BinaryBox.Core.System.IO
             {
                 result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen, false);
             }
-            else if (_mutex.WaitOne(Settings.WriteTimeout))
+            else
             {
                 try
                 {
-                    try
-                    {
-                        result = await _btyeStream.WriteAsync(data, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.LogError(ex, ex.Message);
-                        throw;
-                    }
+                    result = await _btyeStream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
+                    Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            else
-            {
-                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.WriteTimeout, false);
             }
             return result;
         }

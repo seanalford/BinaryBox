@@ -31,7 +31,7 @@ namespace BinaryBox.Connection.Test
             using (ConnectionFake connection = new ConnectionFake(null, connectionSettings))
             {
                 // Assert
-                connection.Should().BeAssignableTo<IConnection>();
+                connection.Should().BeAssignableTo<IByteSteam>();
             }
         }
 

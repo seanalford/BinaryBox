@@ -148,7 +148,7 @@ namespace BinaryBox.Core.System.IO
                 var primaryReadResponse = await byteStream.ReadPrimaryAsync(cancellationToken);
                 if (primaryReadResponse.Success)
                 {
-                    result = await byteStream.ReadSecondaryAsync(endOfText, cancellationToken);
+                    result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
                 }
             }
             catch (Exception ex)
