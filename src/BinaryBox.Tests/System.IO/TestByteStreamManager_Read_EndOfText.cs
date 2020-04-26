@@ -15,8 +15,7 @@ namespace BinaryBox.Core.System.IO.Test
         // - NotOpen        
         // - PrimaryTimeout        
         // - SecondaryTimeout        
-        // - Unhandled Exception        
-        // - Mutex Timeout ???     
+        // - Unhandled Exception                
 
         [Fact]
         public async Task TestSuccess()
