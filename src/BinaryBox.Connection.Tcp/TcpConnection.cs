@@ -126,11 +126,11 @@ namespace BinaryBox.Connection.Tcp
                 if (Client?.Connected == false) { result = new ByteStreamResponse<int>(ByteStreamResponseStatusCode.NotOpen, 0); }
                 if (result == default)
                 {
-                    var responce = await Client.GetStream().ReadAsync(buffer, offset, count, cancellationToken);
+                    var response = await Client.GetStream().ReadAsync(buffer, offset, count, cancellationToken);
 
                     // NOTE: WriteAsync only returns number of bytes written so we're assuming OK, and that
                     //       an exception will be thrown otherwise.
-                    result = new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, responce);
+                    result = new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, response);
                 }
             }
             catch (Exception ex)

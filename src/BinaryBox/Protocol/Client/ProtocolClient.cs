@@ -45,7 +45,7 @@ namespace BinaryBox.Protocol
         /// </summary>
         /// <param name="message">IHexAsciiMessage to send</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>Returns True is if responce is HexAsciiMessageStatus.ACK, otherwise False.</returns>
+        /// <returns>Returns True is if response is HexAsciiMessageStatus.ACK, otherwise False.</returns>
         private async Task<IProtocolResponse<TProtocolMessageData>> Tx(TProtocolMessage message, CancellationToken cancellationToken)
         {
             IProtocolResponse<TProtocolMessageData> result;
@@ -62,11 +62,11 @@ namespace BinaryBox.Protocol
                         // Validate Trasmission?
                         if (message.ValidateTx)
                         {
-                            var responce = await TxResult(message, cancellationToken);
-                            if (responce.Success)
+                            var response = await TxResult(message, cancellationToken);
+                            if (response.Success)
                             {
                                 // Valid Repsonce?
-                                if (message.ValidTx(responce.Data))
+                                if (message.ValidTx(response.Data))
                                 {
                                     result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.OK);
                                     break;
@@ -111,10 +111,10 @@ namespace BinaryBox.Protocol
             {
                 try
                 {
-                    var responce = await RxRead(message, cancellationToken);
-                    if (responce.Success)
+                    var response = await RxRead(message, cancellationToken);
+                    if (response.Success)
                     {
-                        if (message.Decode(responce.Data))
+                        if (message.Decode(response.Data))
                         {
                             // Send ACK to host to signal message received.
                             await SendAck(message, cancellationToken);
