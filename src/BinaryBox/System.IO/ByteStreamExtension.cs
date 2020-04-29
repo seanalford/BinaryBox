@@ -162,6 +162,10 @@ namespace BinaryBox.Core.System.IO
                 {
                     result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
                 }
+                else
+                {
+                    result = new ByteStreamResponse<byte[]>(response.Status);
+                }
             }
             catch (Exception ex)
             {
