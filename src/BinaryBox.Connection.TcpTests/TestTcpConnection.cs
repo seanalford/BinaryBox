@@ -23,8 +23,8 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
-        public async void TestDefaultConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
+        [InlineData("127.0.0.1", 7777, ByteStreamState.Open)]
+        public async void TestDefaultConnectAsyncWithDefaultSettings(string host, int port, ByteStreamState expectedResult)
         {
             // Arange            
             StartServer(host, port);
@@ -41,8 +41,8 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
-        public async void TestConnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
+        [InlineData("127.0.0.1", 7777, ByteStreamState.Open)]
+        public async void TestConnectAsyncWithDefaultSettings(string host, int port, ByteStreamState expectedResult)
         {
             // Arange            
             StartServer(host, port);
@@ -59,8 +59,8 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 7777, ConnectionState.Connected)]
-        public async void TestConnectAsyncWithCustomSettings(string host, int port, ConnectionState expectedResult)
+        [InlineData("127.0.0.1", 7777, ByteStreamState.Open)]
+        public async void TestConnectAsyncWithCustomSettings(string host, int port, ByteStreamState expectedResult)
         {
             // Arange
             StartServer(host, port);
@@ -76,8 +76,8 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 7777, ConnectionState.Disconnected)]
-        public async void TestDisconnectAsyncWithDefaultSettings(string host, int port, ConnectionState expectedResult)
+        [InlineData("127.0.0.1", 7777, ByteStreamState.Closed)]
+        public async void TestDisconnectAsyncWithDefaultSettings(string host, int port, ByteStreamState expectedResult)
         {
             // Arange            
             StartServer(host, port);
@@ -94,8 +94,8 @@ namespace BinaryBox.Connection.Tcp.Tests
         }
 
         [Theory]
-        [InlineData("127.0.0.1", 7777, ConnectionState.Disconnected)]
-        public async void TestDisconnectAsyncWithCustomSettings(string host, int port, ConnectionState expectedResult)
+        [InlineData("127.0.0.1", 7777, ByteStreamState.Closed)]
+        public async void TestDisconnectAsyncWithCustomSettings(string host, int port, ByteStreamState expectedResult)
         {
             // Arange
             StartServer(host, port);
