@@ -143,6 +143,15 @@ namespace BinaryBox.Protocol
                             }
                         }
                     }
+                    else
+                    {
+                        if (retires++ == Settings.ReceiveRetries)
+                        {
+                            result = new ProtocolResponse<TProtocolMessageData>(ProtocolResponseStatusCode.ReceiveRetryLimitExceeded);
+                            Log?.LogInformation(result.Description);
+                            break;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
