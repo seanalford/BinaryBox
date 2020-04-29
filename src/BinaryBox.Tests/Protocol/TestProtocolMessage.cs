@@ -73,22 +73,22 @@ namespace BinaryBox.Protocol.Test
             result.Should().BeEquivalentTo(expected);
         }
 
-        [Theory]
-        [InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 }, ChecksumTypes.None)]
-        [InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3, 1 }, ChecksumTypes.LRC)]
-        [InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3, 242, 132 }, ChecksumTypes.CRC16)]
-        public void TestFakeProtocol(byte[] expected, ChecksumTypes checksum)
-        {
-            // Arrange
-            var fakeProtocolMessage = FakeProtocol.Get(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
+        //[Theory]
+        //[InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3 }, ChecksumTypes.None)]
+        //[InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3, 1 }, ChecksumTypes.LRC)]
+        //[InlineData(new byte[] { 2, 48, 48, 48, 48, 48, 49, 48, 48, 48, 48, 48, 48, 48, 48, 3, 242, 132 }, ChecksumTypes.CRC16)]
+        //public void TestFakeProtocol(byte[] expected, ChecksumTypes checksum)
+        //{
+        //    // Arrange
+        //    var fakeProtocolMessage = FakeProtocol.Get(LoggerFactory.Build(), new FakeProtocolSettings() { Checksum = checksum });
 
-            // Act
-            fakeProtocolMessage.Item(1);
-            byte[] result = fakeProtocolMessage.Encode();
+        //    // Act
+        //    fakeProtocolMessage.Item(1);
+        //    byte[] result = fakeProtocolMessage.Encode();
 
-            // Arrange
-            result.Should().BeEquivalentTo(expected);
-        }
+        //    // Arrange
+        //    result.Should().BeEquivalentTo(expected);
+        //}
     }
 
 }
