@@ -23,7 +23,7 @@ namespace BinaryBox.Core.System.IO
 
                     var response = await byteStream.DataAvailableAsync();
 
-                    if (response.Success && response.Data) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.OK); break; }
+                    if (response?.Success == true && response?.Data == true) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.OK); break; }
                 }
             }
             catch (Exception ex)
@@ -49,13 +49,21 @@ namespace BinaryBox.Core.System.IO
                     if (cancellationToken.IsCancellationRequested) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.Cancelled); break; }
                     if (stopwatch.ElapsedMilliseconds > byteStream.Settings.SecondaryReadTimeout) { result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.SecondaryReadTimeout); break; }
 
-                    var response = await byteStream.ReadAsync(resultData, byteOffset, bytesRemaining);
+                    var response = await byteStream.ReadAsync(resultData, byteOffset, bytesRemaining, cancellationToken);
 
-                    if (response.Success && response.Data > 0)
+                    if (response?.Success == true && response?.Data > 0)
                     {
                         byteOffset += response.Data;
                         bytesRemaining -= response.Data;
                         stopwatch.Restart();
+                    }
+                    else
+                    {
+                        if (response?.Status == ByteStreamResponseStatusCode.Cancelled)
+                        {
+                            result = new ByteStreamResponse<byte[]>(response.Status);
+                            break;
+                        }
                     }
                 }
 
@@ -83,7 +91,7 @@ namespace BinaryBox.Core.System.IO
                 {
                     var response = await byteStream.ReadSecondaryAsync(1, cancellationToken);
 
-                    if (response.Success && response.Data.Length > 0)
+                    if (response?.Success == true && response?.Data.Length > 0)
                     {
                         resultData.Add(response.Data[0]);
                         if (response.Data[0] == endOfText) { break; }
@@ -98,7 +106,7 @@ namespace BinaryBox.Core.System.IO
                 if (result == default && checksumLength > 0)
                 {
                     var response = await byteStream.ReadSecondaryAsync(checksumLength, cancellationToken);
-                    if (response.Success && response.Data.Length > 0)
+                    if (response?.Success == true && response?.Data.Length > 0)
                     {
                         resultData.AddRange(response.Data);
                     }
@@ -126,10 +134,14 @@ namespace BinaryBox.Core.System.IO
             ByteStreamResponse<byte[]> result = default;
             try
             {
-                var primaryReadResponse = await byteStream.ReadPrimaryAsync(cancellationToken);
-                if (primaryReadResponse.Success)
+                var response = await byteStream.ReadPrimaryAsync(cancellationToken);
+                if (response?.Success == true)
                 {
                     result = await byteStream.ReadSecondaryAsync(bytesToRead, cancellationToken);
+                }
+                else
+                {
+                    result = new ByteStreamResponse<byte[]>(response.Status);
                 }
             }
             catch (Exception ex)
@@ -145,8 +157,8 @@ namespace BinaryBox.Core.System.IO
             ByteStreamResponse<byte[]> result = default;
             try
             {
-                var primaryReadResponse = await byteStream.ReadPrimaryAsync(cancellationToken);
-                if (primaryReadResponse.Success)
+                var response = await byteStream.ReadPrimaryAsync(cancellationToken);
+                if (response?.Success == true)
                 {
                     result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
                 }

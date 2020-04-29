@@ -20,32 +20,11 @@ namespace BinaryBox.Core.System.IO.Test
         [Fact]
         public async Task TestSuccess()
         {
-            // Arrange
-            byte[][] data = new byte[][] { new byte[] { 1 }, new byte[] { 1, 2 }, new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 3, 4 }, new byte[] { 1, 2, 3, 4, 5 } };
-            IByteStream byteStream = Substitute.For<IByteStream>();
-            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
-            byteStream.State.Returns(ByteStreamState.Open);
-            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
-            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns
-                (
-                    x => { x[0] = data[1]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[2]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[3]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[4]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[5]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); }
-                );
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            // Arrange                
 
-            for (int i = 0; i < 5; i++)
-            {
-                // Act
-                var result = await byteStreamManager.ReadAsync((byte)i);
+            // Act
 
-                // Assert
-                result.Status.Should().Be(ByteStreamResponseStatusCode.OK);
-                result.Success.Should().BeTrue();
-                if (i == 1) result.Data.Should().BeEquivalentTo(data[i]);
-            }
+            // Assert
         }
 
         [Fact]

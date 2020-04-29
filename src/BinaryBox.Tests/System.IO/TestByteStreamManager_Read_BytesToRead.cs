@@ -17,77 +17,117 @@ namespace BinaryBox.Core.System.IO.Test
         // - SecondaryTimeout        
         // - Unhandled Exception                
 
-        [Fact]
-        public async Task TestSuccess()
+        [Theory]
+        [InlineData(5, new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, new byte[] { 1, 2, 3, 4, 5 })]
+        public async Task TestSuccess(int bytesToRead, byte[] data, byte[] expected)
         {
-            // Arrange
-            byte[][] data = new byte[][] { new byte[] { 1 }, new byte[] { 1, 2 }, new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 3, 4 }, new byte[] { 1, 2, 3, 4, 5 } };
+            // Arrange                        
             IByteStream byteStream = Substitute.For<IByteStream>();
             byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
-            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns
-                (
-                    x => { x[0] = data[1]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[2]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[3]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[4]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); },
-                    x => { x[0] = data[5]; return new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, x.ArgAt<int>(2)); }
-                );
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, bytesToRead));
+            byteStream.WhenForAnyArgs(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()))
+                .Do(x =>
+                {
+                    for (int i = 0; i < bytesToRead; i++)
+                    {
+                        x.Arg<byte[]>()[i] = data[i];
+                    }
+                });
             IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
-            for (int i = 0; i < 5; i++)
-            {
-                // Act
-                var result = await byteStreamManager.ReadAsync(i);
+            // Act
+            var result = await byteStreamManager.ReadAsync(bytesToRead);
 
-                // Assert
-                result.Status.Should().Be(ByteStreamResponseStatusCode.OK);
-                result.Success.Should().BeTrue();
-                if (i == 1) result.Data.Should().BeEquivalentTo(data[i]);
-            }
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.OK);
+            result.Success.Should().BeTrue();
+            result.Data.Should().BeEquivalentTo(expected);
+
         }
 
         [Fact]
         public async Task TestCancel()
         {
-            // Arrange                
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.Cancelled, 0));
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
             // Act
+            // NOTE: The cancellationTokenSource.Token here does not actually cause the cancellation as you might expect.
+            //       It has been added to the test for completeness.  The byteStreamMananager simply passes the token along            
+            //       to the byteStream.  In this case the byteStream substitution is faking the cancallation for us.
+            var result = await byteStreamManager.ReadAsync(10, cancellationTokenSource.Token);
 
             // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.Cancelled);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
         }
 
 
         [Fact]
         public async Task TestNotOpen()
         {
-            // Arrange                             
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
             // Act
+            var result = await byteStreamManager.ReadAsync(10);
 
-            // Assert            
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.NotOpen);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
 
         }
 
         [Fact]
         public async Task TestPrimaryTimeout()
         {
-            // Arrange                             
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, false));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
-            // Act            
+            // Act          
+            var result = await byteStreamManager.ReadAsync(10);
 
             // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.PrimaryReadTimeout);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
+
         }
 
         [Fact]
         public async Task TestSecondaryTimeout()
         {
-            // Arrange                             
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
-            // Act            
+            // Act          
+            var result = await byteStreamManager.ReadAsync(10);
 
-            // Assert            
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.SecondaryReadTimeout);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
         }
 
         [Fact]
