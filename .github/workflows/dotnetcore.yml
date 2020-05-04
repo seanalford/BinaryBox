@@ -76,8 +76,8 @@ jobs:
         FileVersion: ${{ env.GITVERSION_ASSEMBLYSEMFILEVER }}
         AssemblyVersion: ${{ env.GITVERSION_ASSEMBLYSEMVER }}
         InformationalVersion: ${{ env.GITVERSION_INFORMATIONALVERSION }}
-    - name: Test
-      run: dotnet test ./src/BinaryBox.sln --configuration Release --no-build
+#     - name: Test
+#       run: dotnet test ./src/BinaryBox.sln --configuration Release --no-build
     - name: Pack
       run: dotnet pack ./src/BinaryBox.sln --configuration Release --no-build --output ./.artifacts
       env:
