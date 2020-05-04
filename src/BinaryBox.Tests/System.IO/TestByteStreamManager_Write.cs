@@ -58,5 +58,22 @@ namespace BinaryBox.Core.System.IO.Test
             result.Success.Should().BeFalse();
             result.Data.Should().BeFalse();
         }
+
+        [Fact]
+        public async Task TestNotOpen()
+        {
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+
+            // Act
+            var result = await byteStreamManager.WriteAsync(new byte[] { 0, 1, 2 }, default);
+
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.NotOpen);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeFalse();
+
+        }
     }
 }
