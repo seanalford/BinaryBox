@@ -92,15 +92,31 @@ namespace BinaryBox.Tests.System.IO
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
 
             // Act          
-            var result = await byteStreamManager.ReadAsync(10);
+            var result = await byteStream.ReadAsync(10);
 
             // Assert
             result.Status.Should().Be(ByteStreamResponseStatusCode.SecondaryReadTimeout);
             result.Success.Should().BeFalse();
             result.Data.Should().BeEquivalentTo(default);
+        }
+
+        [Fact]
+        public async Task TestUnhandledException()
+        {
+            // Arrange                             
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.When(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
+
+            // Act
+            Func<Task> func = async () => { await byteStream.ReadAsync(10); };
+
+            // Assert
+            await func.Should().ThrowAsync<Exception>();
+
         }
     }
 
