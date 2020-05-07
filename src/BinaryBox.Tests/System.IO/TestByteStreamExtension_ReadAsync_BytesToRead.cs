@@ -22,7 +22,6 @@ namespace BinaryBox.Tests.System.IO
         {
             // Arrange                        
             IByteStream byteStream = Substitute.For<IByteStream>();
-            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, bytesToRead));
@@ -49,7 +48,6 @@ namespace BinaryBox.Tests.System.IO
         {
             // Arrange                        
             IByteStream byteStream = Substitute.For<IByteStream>();
-            byteStream.OpenAsync().Returns(new ByteStreamResponse<ByteStreamState>(ByteStreamResponseStatusCode.OK, ByteStreamState.Open));
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.Cancelled, 0));
@@ -66,5 +64,44 @@ namespace BinaryBox.Tests.System.IO
             result.Success.Should().BeFalse();
             result.Data.Should().BeEquivalentTo(default);
         }
+
+        [Fact]
+        public async Task TestPrimaryTimeout()
+        {
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, false));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
+
+            // Act          
+            var result = await byteStream.ReadAsync(10);
+
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.PrimaryReadTimeout);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
+
+        }
+
+        [Fact]
+        public async Task TestSecondaryTimeout()
+        {
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+
+            // Act          
+            var result = await byteStreamManager.ReadAsync(10);
+
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.SecondaryReadTimeout);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
+        }
     }
+
 }
