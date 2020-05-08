@@ -103,5 +103,22 @@ namespace BinaryBox.Core.System.IO.Test
             result.Success.Should().BeFalse();
             result.Data.Should().BeEquivalentTo(default);
         }
+
+        [Fact]
+        public async Task TestUnhandledException()
+        {
+            // Arrange                             
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.When(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
+
+            // Act
+            Func<Task> func = async () => { await byteStream.ReadAsync((byte)10); };
+
+            // Assert
+            await func.Should().ThrowAsync<Exception>();
+
+        }
     }
 }
