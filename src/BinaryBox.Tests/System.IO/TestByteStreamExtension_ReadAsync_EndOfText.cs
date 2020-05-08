@@ -85,5 +85,23 @@ namespace BinaryBox.Core.System.IO.Test
             result.Success.Should().BeFalse();
             result.Data.Should().BeEquivalentTo(default);
         }
+
+        [Fact]
+        public async Task TestSecondaryTimeout()
+        {
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
+            byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
+
+            // Act          
+            var result = await byteStream.ReadAsync((byte)10);
+
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.SecondaryReadTimeout);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
+        }
     }
 }
