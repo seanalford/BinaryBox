@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace BinaryBox.Tests.System.IO
+namespace BinaryBox.Core.System.IO.Test
 {
     public class TestByteStreamExtension_ReadAsync_BytesToRead
     {
