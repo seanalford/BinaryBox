@@ -64,6 +64,21 @@ namespace BinaryBox.Tests.System.IO
         }
 
         [Fact]
+        public async Task TestNotOpen()
+        {
+            // Arrange                        
+            IByteStream byteStream = Substitute.For<IByteStream>();
+
+            // Act
+            var result = await byteStream.ReadAsync(10);
+
+            // Assert
+            result.Status.Should().Be(ByteStreamResponseStatusCode.NotOpen);
+            result.Success.Should().BeFalse();
+            result.Data.Should().BeEquivalentTo(default);
+        }
+
+        [Fact]
         public async Task TestPrimaryTimeout()
         {
             // Arrange                        
