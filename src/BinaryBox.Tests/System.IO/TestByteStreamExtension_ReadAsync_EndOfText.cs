@@ -81,7 +81,6 @@ namespace BinaryBox.Core.System.IO.Test
             result.Status.Should().Be(ByteStreamResponseStatusCode.NotOpen);
             result.Success.Should().BeFalse();
             result.Data.Should().BeEquivalentTo(default);
-
         }
 
         [Fact]
