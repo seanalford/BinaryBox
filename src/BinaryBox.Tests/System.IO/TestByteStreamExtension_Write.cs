@@ -69,5 +69,21 @@ namespace BinaryBox.Core.System.IO.Test
             result.Data.Should().BeFalse();
 
         }
+
+        [Fact]
+        public async Task TestUnhandledException()
+        {
+            // Arrange                             
+            IByteStream byteStream = Substitute.For<IByteStream>();
+            byteStream.State.Returns(ByteStreamState.Open);
+            byteStream.When(x => x.WriteAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
+
+            // Act
+            Func<Task> func = async () => { await byteStream.WriteAsync(new byte[] { 0, 1, 2 }, default); };
+
+            // Assert
+            await func.Should().ThrowAsync<Exception>();
+
+        }
     }
 }
