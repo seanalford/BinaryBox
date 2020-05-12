@@ -132,9 +132,13 @@ namespace BinaryBox.Core.System.IO
         public async static Task<ByteStreamResponse<byte[]>> ReadAsync(this IByteStream byteStream, int bytesToRead, CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<byte[]> result = default;
-            try
+            if (byteStream.State != ByteStreamState.Open)
             {
-                if (byteStream.State == ByteStreamState.Open)
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
+            }
+            else
+            {
+                try
                 {
                     var response = await byteStream.ReadPrimaryAsync(cancellationToken);
                     if (response?.Success == true)
@@ -146,15 +150,11 @@ namespace BinaryBox.Core.System.IO
                         result = new ByteStreamResponse<byte[]>(response.Status);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
+                    byteStream.Log?.LogError(ex, ex.Message);
+                    throw;
                 }
-            }
-            catch (Exception ex)
-            {
-                byteStream.Log?.LogError(ex, ex.Message);
-                throw;
             }
             return result;
         }
