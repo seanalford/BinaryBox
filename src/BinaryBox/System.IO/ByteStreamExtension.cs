@@ -195,7 +195,14 @@ namespace BinaryBox.Core.System.IO
             ByteStreamResponse<bool> result = default;
             try
             {
-                result = await byteStream?.WriteAsync(data, 0, data.Length, cancellationToken);
+                if (byteStream.State == ByteStreamState.Open)
+                {
+                    result = await byteStream?.WriteAsync(data, 0, data.Length, cancellationToken);
+                }
+                else
+                {
+                    result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen);
+                }
             }
             catch (Exception ex)
             {
