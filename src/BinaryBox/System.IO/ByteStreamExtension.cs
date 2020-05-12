@@ -157,16 +157,24 @@ namespace BinaryBox.Core.System.IO
             ByteStreamResponse<byte[]> result = default;
             try
             {
-                var response = await byteStream.ReadPrimaryAsync(cancellationToken);
-                if (response?.Success == true)
+                if (byteStream.State == ByteStreamState.Open)
                 {
-                    result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
+                    var response = await byteStream.ReadPrimaryAsync(cancellationToken);
+                    if (response?.Success == true)
+                    {
+                        result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
+                    }
+                    else
+                    {
+                        result = new ByteStreamResponse<byte[]>(response.Status);
+                    }
                 }
                 else
                 {
-                    result = new ByteStreamResponse<byte[]>(response.Status);
+                    result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
                 }
             }
+
             catch (Exception ex)
             {
                 byteStream.Log?.LogError(ex, ex.Message);
