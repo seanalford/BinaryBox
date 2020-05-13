@@ -132,22 +132,29 @@ namespace BinaryBox.Core.System.IO
         public async static Task<ByteStreamResponse<byte[]>> ReadAsync(this IByteStream byteStream, int bytesToRead, CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<byte[]> result = default;
-            try
+            if (byteStream.State != ByteStreamState.Open)
             {
-                var response = await byteStream.ReadPrimaryAsync(cancellationToken);
-                if (response?.Success == true)
-                {
-                    result = await byteStream.ReadSecondaryAsync(bytesToRead, cancellationToken);
-                }
-                else
-                {
-                    result = new ByteStreamResponse<byte[]>(response.Status);
-                }
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            catch (Exception ex)
+            else
             {
-                byteStream.Log?.LogError(ex, ex.Message);
-                throw;
+                try
+                {
+                    var response = await byteStream.ReadPrimaryAsync(cancellationToken);
+                    if (response?.Success == true)
+                    {
+                        result = await byteStream.ReadSecondaryAsync(bytesToRead, cancellationToken);
+                    }
+                    else
+                    {
+                        result = new ByteStreamResponse<byte[]>(response.Status);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    byteStream.Log?.LogError(ex, ex.Message);
+                    throw;
+                }
             }
             return result;
         }
@@ -155,22 +162,29 @@ namespace BinaryBox.Core.System.IO
         public async static Task<ByteStreamResponse<byte[]>> ReadAsync(this IByteStream byteStream, byte endOfText, int checksumLength = 0, CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<byte[]> result = default;
-            try
+            if (byteStream.State != ByteStreamState.Open)
             {
-                var response = await byteStream.ReadPrimaryAsync(cancellationToken);
-                if (response?.Success == true)
-                {
-                    result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
-                }
-                else
-                {
-                    result = new ByteStreamResponse<byte[]>(response.Status);
-                }
+                result = new ByteStreamResponse<byte[]>(ByteStreamResponseStatusCode.NotOpen);
             }
-            catch (Exception ex)
+            else
             {
-                byteStream.Log?.LogError(ex, ex.Message);
-                throw;
+                try
+                {
+                    var response = await byteStream.ReadPrimaryAsync(cancellationToken);
+                    if (response?.Success == true)
+                    {
+                        result = await byteStream.ReadSecondaryAsync(endOfText, checksumLength, cancellationToken);
+                    }
+                    else
+                    {
+                        result = new ByteStreamResponse<byte[]>(response.Status);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    byteStream.Log?.LogError(ex, ex.Message);
+                    throw;
+                }
             }
             return result;
         }
@@ -178,14 +192,24 @@ namespace BinaryBox.Core.System.IO
         public async static Task<ByteStreamResponse<bool>> WriteAsync(this IByteStream byteStream, byte[] data, CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<bool> result = default;
-            try
+            if (byteStream.State == ByteStreamState.Open)
             {
-                result = await byteStream?.WriteAsync(data, 0, data.Length, cancellationToken);
+                try
+                {
+
+                    result = await byteStream?.WriteAsync(data, 0, data.Length, cancellationToken);
+                }
+
+
+                catch (Exception ex)
+                {
+                    byteStream.Log?.LogError(ex, ex.Message);
+                    throw;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                byteStream.Log?.LogError(ex, ex.Message);
-                throw;
+                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen);
             }
             return result;
         }
