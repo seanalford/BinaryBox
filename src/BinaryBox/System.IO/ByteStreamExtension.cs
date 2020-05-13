@@ -192,21 +192,24 @@ namespace BinaryBox.Core.System.IO
         public async static Task<ByteStreamResponse<bool>> WriteAsync(this IByteStream byteStream, byte[] data, CancellationToken cancellationToken = default)
         {
             ByteStreamResponse<bool> result = default;
-            try
+            if (byteStream.State == ByteStreamState.Open)
             {
-                if (byteStream.State == ByteStreamState.Open)
+                try
                 {
+
                     result = await byteStream?.WriteAsync(data, 0, data.Length, cancellationToken);
                 }
-                else
+
+
+                catch (Exception ex)
                 {
-                    result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen);
+                    byteStream.Log?.LogError(ex, ex.Message);
+                    throw;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                byteStream.Log?.LogError(ex, ex.Message);
-                throw;
+                result = new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.NotOpen);
             }
             return result;
         }
