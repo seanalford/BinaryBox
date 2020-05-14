@@ -1,9 +1,10 @@
 ﻿using BinaryBox.Checksum;
 using System;
+using System.ComponentModel;
 
 namespace BinaryBox.Protocol.Settings
 {
-    public interface IProtocolSettings : IDisposable
+    public interface IProtocolSettings : IDisposable, INotifyPropertyChanged
     {
         int BufferSize { get; set; }
         ChecksumTypes Checksum { get; set; }

@@ -1,12 +1,13 @@
 ﻿using BinaryBox.Protocol.Settings;
 using Microsoft.Extensions.Logging;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BinaryBox.Core.System.IO
 {
-    public interface IByteStreamManager : IDisposable
+    public interface IByteStreamManager : IDisposable, INotifyPropertyChanged
     {
         ILogger Log { get; }
         IProtocolSettings Settings { get; set; }
