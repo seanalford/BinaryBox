@@ -1,4 +1,5 @@
 ﻿using BinaryBox.Core.System.IO;
+using BinaryBox.Protocol.Settings;
 using System.Threading;
 using System.Threading.Tasks;
 

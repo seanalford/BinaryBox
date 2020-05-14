@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BinaryBox.Protocol.Settings;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
 using System.Threading;
@@ -12,13 +13,13 @@ namespace BinaryBox.Core.System.IO
 
         public ILogger Log { get; protected set; }
 
-        public IByteStreamSettings Settings { get; set; }
+        public IProtocolSettings Settings { get; set; }
 
         public ByteStreamState State => _btyeStream.State;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ByteStreamManager(IByteStream byteStream, IByteStreamSettings settings, ILogger logger = default)
+        public ByteStreamManager(IByteStream byteStream, IProtocolSettings settings, ILogger logger = default)
         {
             _btyeStream = byteStream;
             Settings = settings;

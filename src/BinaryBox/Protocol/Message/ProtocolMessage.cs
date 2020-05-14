@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BinaryBox.Protocol.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace BinaryBox.Protocol
 {

@@ -28,7 +28,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings()) { Host = host, Port = port };
+            using TcpConnection connection = new TcpConnection(null, new FakeProtocolSettings()) { Host = host, Port = port };
 
             // Act
             var response = await connection.OpenAsync();
@@ -46,7 +46,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings());
+            using TcpConnection connection = new TcpConnection(null, new FakeProtocolSettings());
 
             // Act
             var state = await connection.OpenAsync(host, port);
@@ -64,7 +64,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings() { PrimaryReadTimeout = 500 });
+            using TcpConnection connection = new TcpConnection(null, new FakeProtocolSettings() { PrimaryReadTimeout = 500 });
 
             // Act
             var state = await connection.OpenAsync(host, port);
@@ -81,7 +81,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange            
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings());
+            using TcpConnection connection = new TcpConnection(null, new FakeProtocolSettings());
 
             // Act
             var state = await connection.OpenAsync(host, port);
@@ -99,7 +99,7 @@ namespace BinaryBox.Connection.Tcp.Tests
         {
             // Arange
             StartServer(host, port);
-            using TcpConnection connection = new TcpConnection(null, new ByteStreamSettings() { PrimaryReadTimeout = 500 });
+            using TcpConnection connection = new TcpConnection(null, new FakeProtocolSettings() { PrimaryReadTimeout = 500 });
 
             // Act
             var state = await connection.OpenAsync(host, port);
