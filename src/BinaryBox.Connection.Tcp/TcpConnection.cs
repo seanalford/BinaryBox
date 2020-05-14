@@ -1,4 +1,5 @@
 ﻿using BinaryBox.Core.System.IO;
+using BinaryBox.Protocol.Settings;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
@@ -15,7 +16,7 @@ namespace BinaryBox.Connection.Tcp
 
         private TcpClient Client = null;
 
-        public TcpConnection(ILogger logger, IByteStreamSettings settings) : base(logger, settings)
+        public TcpConnection(ILogger logger, IProtocolSettings settings) : base(logger, settings)
         {
         }
 

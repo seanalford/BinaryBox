@@ -1,5 +1,6 @@
 ﻿using BinaryBox.Checksum;
 using BinaryBox.Core.System.IO;
+using BinaryBox.Protocol.Settings;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;

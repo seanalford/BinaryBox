@@ -1,16 +1,17 @@
 ﻿using BinaryBox.Checksum;
+using BinaryBox.Protocol.Settings;
 using FluentAssertions;
 using Xunit;
 
 namespace BinaryBox.Protocol.Test
-{
+{    
     public class TestProtocolSettings
     {
         [Fact]
         public void TestDefaultProtocolSettings()
         {
             // Arrange
-            IProtocolSettings protocolSettings = new ProtocolSettings();
+            IProtocolSettings protocolSettings = new FakeProtocolSettings();
 
             // Act
 
@@ -29,7 +30,7 @@ namespace BinaryBox.Protocol.Test
         public void TestConstrucorAssignedProtocolSettings(ChecksumTypes checksum, int connectRetries, int receiveRetries, int sendRetries)
         {
             // Arrange / Act
-            IProtocolSettings protocolSettings = new ProtocolSettings()
+            IProtocolSettings protocolSettings = new FakeProtocolSettings()
             {
                 Checksum = checksum,
                 ConnectRetries = connectRetries,
@@ -52,7 +53,7 @@ namespace BinaryBox.Protocol.Test
         public void TestAssignedProtocolSettings(ChecksumTypes checksum, int connectRetries, int receiveRetries, int sendRetries)
         {
             // Arrange
-            IProtocolSettings protocolSettings = new ProtocolSettings();
+            IProtocolSettings protocolSettings = new FakeProtocolSettings();
 
             // Act            
             protocolSettings.Checksum = checksum;

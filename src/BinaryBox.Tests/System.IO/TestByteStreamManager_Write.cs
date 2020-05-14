@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Protocol.Settings;
+using BinaryBox.Protocol.Test;
+using FluentAssertions;
 using NSubstitute;
 using System;
 using System.Threading;
@@ -26,7 +28,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.WriteAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
 
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             var result = await byteStreamManager.WriteAsync(data, default);
@@ -44,7 +46,7 @@ namespace BinaryBox.Core.System.IO.Test
             IByteStream byteStream = Substitute.For<IByteStream>();
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.WriteAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.Cancelled, false));
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
             // Act
@@ -64,7 +66,7 @@ namespace BinaryBox.Core.System.IO.Test
         {
             // Arrange                        
             IByteStream byteStream = Substitute.For<IByteStream>();
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             var result = await byteStreamManager.WriteAsync(new byte[] { 0, 1, 2 }, default);
@@ -84,7 +86,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.When(x => x.WriteAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
 
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             Func<Task> func = async () => { await byteStreamManager.WriteAsync(new byte[] { 0, 1, 2 }, default); };

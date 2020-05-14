@@ -1,4 +1,6 @@
-﻿namespace BinaryBox.Protocol
+﻿using BinaryBox.Protocol.Settings;
+
+namespace BinaryBox.Protocol
 {
     public interface IProtocolMessage<TProtocolSettings, TProtocolMessageData> : IProtocol
         where TProtocolSettings : IProtocolSettings

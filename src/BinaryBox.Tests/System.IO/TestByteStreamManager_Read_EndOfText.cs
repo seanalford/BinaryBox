@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using BinaryBox.Protocol.Settings;
+using BinaryBox.Protocol.Test;
+using FluentAssertions;
 using NSubstitute;
 using System;
 using System.Threading;
@@ -38,7 +40,7 @@ namespace BinaryBox.Core.System.IO.Test
                     x.Arg<byte[]>()[0] = data[index++];
                 });
 
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             var result = await byteStreamManager.ReadAsync(endOfText);
@@ -58,7 +60,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.Cancelled, 0));
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
             // Act
@@ -79,7 +81,7 @@ namespace BinaryBox.Core.System.IO.Test
         {
             // Arrange                        
             IByteStream byteStream = Substitute.For<IByteStream>();
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             var result = await byteStreamManager.ReadAsync((byte)10);
@@ -100,7 +102,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, false));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act          
             var result = await byteStreamManager.ReadAsync((byte)10);
@@ -120,7 +122,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.State.Returns(ByteStreamState.Open);
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(new ByteStreamResponse<int>(ByteStreamResponseStatusCode.OK, 0));
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act          
             var result = await byteStreamManager.ReadAsync((byte)10);
@@ -141,7 +143,7 @@ namespace BinaryBox.Core.System.IO.Test
             byteStream.DataAvailableAsync().Returns(new ByteStreamResponse<bool>(ByteStreamResponseStatusCode.OK, true));
             byteStream.When(x => x.ReadAsync(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())).Do(x => { throw new Exception(); });
 
-            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new ByteStreamSettings());
+            IByteStreamManager byteStreamManager = new ByteStreamManager(byteStream, new FakeProtocolSettings());
 
             // Act
             Func<Task> func = async () => { await byteStreamManager.ReadAsync((byte)10); };
